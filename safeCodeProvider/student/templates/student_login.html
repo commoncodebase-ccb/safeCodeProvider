@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/static/student/student_login.css">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <title>Student Login</title>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Student Login</h1>
+        <!-- Eğer bir hata varsa, JavaScript alert ile göster -->
+        {% if error_message %}
+        <script>
+            alert("{{ error_message }}");
+        </script>
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            <label for="student_id">Student ID:</label>
+            <input type="text" name="student_id" id="student_id" placeholder="Enter your ID" required>
+
+            <label for="student_name">Student Name:</label>
+            <input type="text" name="student_name" id="student_name" placeholder="Enter your name" required>
+
+            <label for="exam_password">Exam Password:</label>
+            <input type="password" name="exam_password" id="exam_password" placeholder="Enter the exam password" required>
+
+            <button type="submit">Login</button>
+        </form>
+    </div>
+</body>
+</html>
