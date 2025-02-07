@@ -1,120 +1,95 @@
 body {
+    background-color: #052756; /* Galaxy blue */
+    color: white;
     font-family: Arial, sans-serif;
-    background-color: #d13f3f;
+    margin: 40;
+    padding: 0;
+}
+
+.upload-container {
     display: flex;
     justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
+    gap: 20px;
+    margin: 30px 0;
 }
 
-h2 {
-    color: #333;
+.upload-box {
+    background-color: #2986BF; /* Light blue */
+    border-radius: 12px;
+    padding: 80px;
+    text-align: center;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    width: 300px;
 }
 
-button {
-    background-color: #66778a;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    margin: 10px;
-    cursor: pointer;
-    border-radius: 5px;
-    font-size: 16px;
+.upload-box h3 {
+    margin-bottom: 15px;
+    color: #000;
 }
 
-button:hover {
-    background-color: #0056b3;
-}
-
-input[type="file"], input[type="text"] {
+.custom-file-label {
     display: block;
-    margin: 10px auto;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    width: 80%;
-    max-width: 400px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    color: #000;
+}
+
+.file-input {
+    display: none;
+}
+
+.file-name {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.form-container {
+text-align: center;
+margin-top: 20px;
+width: 100%;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 10px; /* Space between elements */
+}
+
+.form-control {
+display: flex;
+align-items: center;
+justify-content: space-between;
+width: 80%; /* Adjust width as needed */
+max-width: 400px;
+margin-bottom: 20px;
 }
 
 label {
-    font-weight: bold;
-    display: block;
-    margin-top: 10px;
+font-size: 16px;
+margin-right: 10px;
+flex: 1; /* Label takes up 1 part of the row */
+text-align: left;
 }
 
-
-/* Ana konteyner */
-.upload-container {
-    display: flex;
-    gap: 20px; /* Öğeler arası boşluk */
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    width: auto;
-    text-align: center;
+input {
+padding: 20px;
+border-radius: 20px;
+border: 1px solid #ccc;
+flex: 2; /* Input takes up 2 parts of the row */
+font-size: 17px;
+margin-top: 10px; /* Moves input slightly downward */
+margin-right: 13px; 
+}
+button {
+margin-top: 20px;
+padding: 10px 20px;
+background-color: #1E90FF;
+color: white;
+border: none;
+border-radius: 8px;
+cursor: pointer;
+font-size: 23px;
+margin-left: 110px;
 }
 
-/* Her dosya yükleme kutusunun stili */
-.upload-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 200px;
-}
-
-h3 {
-    margin-bottom: 10px;
-    font-size: 16px;
-    color: #333;
-}
-
-/* Gizli File Input */
-.file-input {
-    position: absolute;
-    opacity: 0;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-}
-
-/* Özel Yükleme Butonu */
-.custom-file-label {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.3s ease-in-out;
-    font-size: 14px;
-    width: 100%;
-    max-width: 180px;
-}
-
-.custom-file-label:hover {
-    background-color: #0056b3;
-}
-
-.custom-file-label i {
-    margin-right: 8px;
-}
-
-/* Seçilen Dosya Adı */
-.file-name {
-    margin-top: 5px;
-    font-size: 12px;
-    color: #666;
-}
-
-/* Ekran küçüldüğünde dikey hizalama */
-@media (max-width: 700px) {
-    .upload-container {
-        flex-direction: column;
-        align-items: center;
-    }
+button:hover {
+background-color: #4682B4;
 }
