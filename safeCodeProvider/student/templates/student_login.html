@@ -11,13 +11,10 @@
 <body>
     <div class="login-container">
         <h1>Student Login</h1>
-        <!-- Eğer bir hata varsa, JavaScript alert ile göster -->
-        {% if error_message %}
-        <script>
-            alert("{{ error_message }}");
-        </script>
-        {% endif %}
-        <form method="post">
+
+        <div id="response-message" class="error-message" style="display: none;"></div>
+
+        <form id="login-form">
             {% csrf_token %}
             <label for="student_id">Student ID:</label>
             <input type="text" name="student_id" id="student_id" placeholder="Enter your ID" required>
@@ -28,8 +25,41 @@
             <label for="exam_password">Exam Password:</label>
             <input type="password" name="exam_password" id="exam_password" placeholder="Enter the exam password" required>
 
-            <button type="submit">Login</button>
+            <button onclick="student_control()" type="submit">Login</button>
         </form>
     </div>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            
+            try {
+                const response = await fetch('/control/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        "X-CSRFToken": csrfToken
+                    }
+                });
+    
+                const result = await response.json();
+                const responseMessage = document.getElementById('response-message');
+    
+                if (result.status === 'success') {
+                    responseMessage.style.display = 'none';
+                    window.location.href = result.redirect_url;  // Yönlendirme buradan yapılır
+                } else {
+                    responseMessage.style.display = 'block';
+                    responseMessage.textContent = result.message;
+                    responseMessage.style.color = 'red';
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        });
+    </script>
 </body>
 </html>
