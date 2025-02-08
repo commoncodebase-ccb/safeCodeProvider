@@ -51,13 +51,24 @@
 
     <br><br>
 
-    <label>Time:</label>
-    <input type="text" id="exam_time">
-
-    <label>Exam Name:</label>
-    <input type="text" id="exam_name">
-
-    <button onclick="startExam()">Sınavı Başlat</button>
+    <div class="form-container">
+        <div class="form-control">
+            <label for="exam_time">Time:</label>
+            <input type="text" id="exam_time">
+        </div>
+    
+        <div class="form-control">
+            <label for="exam_name">Exam Name:</label>
+            <input type="text" id="exam_name">
+        </div>
+    
+        <div class="form-control">
+            <label for="output_directory">Output Directory:</label>
+            <input type="text" id="output_directory">
+        </div>
+    
+        <button onclick="startExam()">Start Assignment</button>
+    </div>
 
     <script>
         /*function uploadFile(inputId, fileType) {
@@ -147,6 +158,8 @@
         function startExam() {
             let time = document.getElementById("exam_time").value;
             let exam_name = document.getElementById("exam_name").value;
+            let outputDirectory = document.getElementById("output_directory").value;
+
 
             if (!time || !exam_name) {
                 alert("Lütfen sınav adı ve süresini girin.");
