@@ -1,65 +1,68 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html> 
+<html lang="en"> 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="/static/student/student_login.css">
-    <meta name="csrf-token" content="{{ csrf_token }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <title>Student Login</title>
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <link rel="stylesheet" type="text/css" href="/static/student/student_login.css"> 
+    <meta name="csrf-token" content="{{ csrf_token }}"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"> 
+    <title>Student Login</title> 
 </head>
 <body>
-    <div class="login-container">
-        <h1>Student Login</h1>
+    <div class="login-container"> 
+        <h1>Student Login</h1> 
 
-        <div id="response-message" class="error-message" style="display: none;"></div>
+        <div id="response-message" class="error-message" style="display: none;"></div> 
 
-        <form id="login-form">
-            {% csrf_token %}
-            <label for="student_id">Student ID:</label>
-            <input type="text" name="student_id" id="student_id" placeholder="Enter your ID" required>
+        <form id="login-form"> 
+            {% csrf_token %} 
+            
+            <label for="student_id">Student ID:</label> 
+            <input type="text" name="student_id" id="student_id" placeholder="Enter your ID" required> 
 
-            <label for="student_name">Student Name:</label>
+            <label for="student_name">Student Name:</label> 
             <input type="text" name="student_name" id="student_name" placeholder="Enter your name" required>
 
-            <label for="exam_password">Exam Password:</label>
-            <input type="password" name="exam_password" id="exam_password" placeholder="Enter the exam password" required>
+            <label for="exam_password">Exam Password:</label> 
+            <input type="password" name="exam_password" id="exam_password" placeholder="Enter the exam password" required> 
 
-            <button onclick="student_control()" type="submit">Login</button>
+            <button onclick="student_control()" type="submit">Login</button> <!-- Giriş butonu, tıklanınca student_control fonksiyonunu çağırır -->
         </form>
     </div>
 
     <script>
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const formData = new FormData(e.target);
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            
-            try {
-                const response = await fetch('/control/', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        "X-CSRFToken": csrfToken
+        function student_control(){
+            document.getElementById('login-form').addEventListener('submit', async (e) => { // Form gönderildiğinde çalışacak event listener
+                e.preventDefault(); 
+                
+                const formData = new FormData(e.target); 
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content'); 
+                
+                try {
+                    const response = await fetch('/control/', { // Sunucuya POST isteği gönderilir
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            "X-CSRFToken": csrfToken 
+                        }
+                    });
+        
+                    const result = await response.json(); // JSON yanıtı alınır ve result değişkenine atanır
+                    const responseMessage = document.getElementById('response-message'); 
+        
+                    if (result.status === 'success') { 
+                        responseMessage.style.display = 'none'; 
+                        window.location.href = result.redirect_url;  
+                    } else { 
+                        responseMessage.style.display = 'block'; 
+                        responseMessage.textContent = result.message; 
+                        responseMessage.style.color = 'red'; 
                     }
-                });
-    
-                const result = await response.json();
-                const responseMessage = document.getElementById('response-message');
-    
-                if (result.status === 'success') {
-                    responseMessage.style.display = 'none';
-                    window.location.href = result.redirect_url;  // Yönlendirme buradan yapılır
-                } else {
-                    responseMessage.style.display = 'block';
-                    responseMessage.textContent = result.message;
-                    responseMessage.style.color = 'red';
+                } catch (error) {
+                    console.error("Error:", error);
                 }
-            } catch (error) {
-                console.error("Error:", error);
-            }
-        });
+            });
+        }
     </script>
 </body>
 </html>
