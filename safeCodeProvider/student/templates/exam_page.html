@@ -4,13 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="/static/student/exam_page.css">
-    <meta name="csrf-token" content="{{ csrf_token }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    
     <title>Exam Page</title>
 </head>
 <body>
-    <h1>Exam Page</h1>
-    <p>{{ message }}</p>
+    <div class="header">
+        <span>Exam Page</span>
+        <span class="timer">Time: 01:59:59</span>
+    </div>
+
+    <div class="container">
+        <div class="instruction">
+            <h3>Instruction Content</h3>
+            <p>Instruction 1: Follow these guidelines...</p>
+            <p>Instruction 2: Code here...</p>
+        </div>
+
+        <div class="editor">
+            <textarea class="code-area" placeholder="Write your code here..."></textarea>
+            <div class="output">Output will be displayed here...</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <button>Run</button>
+        <button>Submit</button>
+    </div>
 </body>
 </html>

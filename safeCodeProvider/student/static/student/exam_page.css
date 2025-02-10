@@ -1,9 +1,88 @@
 body {
     font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
     background-color: #f9f9f9;
-    text-align: center;
-    padding: 20px;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    height: 100vh;
 }
-h1 {
-    color: #333;
+
+.header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    font-size: 20px;
+    position: relative;
+}
+
+.timer {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 10px;
+    padding: 10px;
+}
+
+.instruction {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+.editor {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.code-area {
+    padding: 10px;
+    height: 200px;
+    resize: none;
+    border: none;
+    outline: none;
+    font-family: monospace;
+}
+
+.output {
+    background-color: #f1f1f1;
+    border-top: 1px solid #ddd;
+    padding: 10px;
+    font-family: monospace;
+    overflow-y: auto;
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-top: 1px solid #ddd;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
 }
