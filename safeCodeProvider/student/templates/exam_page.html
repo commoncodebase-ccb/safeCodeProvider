@@ -29,5 +29,22 @@
         <button>Run</button>
         <button>Submit</button>
     </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let timeLeft = JSON.parse('{{ exam_time|escapejs }}') * 60;  // Güvenli JSON dönüşümü
+    
+            function updateTimer() {
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                document.querySelector(".timer").innerText = `Time: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    setTimeout(updateTimer, 1000);
+                }
+            }
+    
+            updateTimer();
+        });
+    </script>
 </body>
 </html>
