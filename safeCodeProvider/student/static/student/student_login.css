@@ -7,44 +7,59 @@ body {
     height: 100vh;
     margin: 0;
 }
+
 .login-container {
     background-color: #ffffff;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    width: 300px;
+    width: 350px; /* Genişliği artırarak daha dengeli bir görüntü sağladık */
     text-align: center;
 }
+
 h1 {
     font-size: 24px;
     margin-bottom: 20px;
 }
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Inputları ortalamak için eklendi */
+}
+
 label {
     display: block;
     text-align: left;
+    width: 100%; /* Genişliği tam alana yay */
     margin-bottom: 5px;
     font-size: 14px;
 }
+
 input[type="text"], input[type="password"] {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 15px;
+    width: 94%; /* Input genişliğini biraz daralttık, form içine dengeli yerleşmesi için */
+    padding: 10px;
+    margin-bottom: 20px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    text-align: center; /* Yazıyı ortalamak için */
 }
+
 button {
-    width: 100%;
+    width: 90%;
     padding: 10px;
-    background-color: #007BFF;
+    background-color: #052756;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
 }
+
 button:hover {
-    background-color: #0056b3;
+    background-color: #041c3a;
 }
+
 .error-message {
     color: red;
     font-size: 14px;
