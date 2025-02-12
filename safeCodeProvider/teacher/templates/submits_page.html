@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .left-container {
+            width: 40%;
+        }
+        .right-container {
+            width: 55%;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .student-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .student-card {
+            background: #f4f4f4;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            width: 80%;
+            transition: background 0.3s;
+        }
+        .student-card a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+            width: 100%;
+            padding: 10px;
+        }
+        .student-card:hover {
+            background: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h2 style="text-align: center;">You can share this url with your students. They will see the exam page at this url:</h2>
+    <h2 style="text-align: center;">http://127.0.0.1:8000/student/exam</h2>
+<div class="container">
+    <div class="left-container">
+        <h2 style="text-align: center;">Student List</h2>
+        <div class="student-container">
+            {% for student in students %}
+                <div class="student-card">
+                    <a href="javascript:void(0);" onclick="alert('Clicked: {{ student.name }}')">
+                        <strong>ID:</strong> {{ student.id }} - <strong>Name:</strong> {{ student.name }}
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="right-container">
+        <h1>Exam Password: {{ exam_password }}</h1>
+        <iframe src="" style="height: 600px; width: 800px; border: 2px solid black;" frameborder="0"></iframe>
+    </div>
+</div>
+</body>
+</html>
+
