@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Submits Page</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        #exam-info { margin-bottom: 20px; }
+        #student-list { width: 30%; float: left; }
+        .student-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 5px 0;
+            background: #f9f9f9;
+        }
+        .student-btn {
+            padding: 5px 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .student-btn:hover { background: #0056b3; }
+        #code-view {
+            margin-left: 35%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            width: 60%;
+            height: 300px;
+            overflow-y: auto;
+            background: #f4f4f4;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div id="exam-info">
+        <p><strong>Exam Password:</strong> <span id="exam-password">Loading...</span></p>
+        <p><strong>Exam URL:</strong> <span id="exam-url">Loading...</span></p>
+    </div>
+    <h3>Student List</h3>
+    <div id="student-list"></div>
+    <div id="code-view">Select a student to view their submission.</div>
+
+    <script>
+        function generateExamPassword() {
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            let password = "";
+            let numbersCount = 0;
+
+            while (password.length < 6) {
+                let char = chars.charAt(Math.floor(Math.random() * chars.length));
+                password += char;
+
+                if (!isNaN(char)) {
+                    numbersCount++;
+                }
+            }
+
+            if (numbersCount < 2) {
+                return generateExamPassword();
+            }
+
+            return password;
+        }
+
+        async function fetchExamInfo() {
+            document.getElementById("exam-password").textContent = generateExamPassword();
+            document.getElementById("exam-url").textContent = "http://192.168.1.1:5000/exam";
+        }
+
+        async function fetchStudentListFromCSV() {
+            try {
+                let response = await fetch('/mnt/data/students.csv');
+                if (!response.ok) throw new Error("Failed to load CSV file.");
+                
+                let data = await response.text();
+                let rows = data.split("\n").map(row => row.trim()).filter(row => row.length > 0);
+                
+                let studentList = document.getElementById("student-list");
+                studentList.innerHTML = "";
+
+                rows.forEach(row => {
+                    let columns = row.split(",");
+                    if (columns.length < 2) return; // Hatalı satırları atla
+                    
+                    let student_id = columns[0].trim();
+                    let name = columns[1].trim();
+
+                    if (student_id && name) {
+                        let studentDiv = document.createElement("div");
+                        studentDiv.className = "student-entry";
+
+                        let studentText = document.createElement("span");
+                        studentText.textContent = `${student_id} - ${name}`;
+
+                        let btn = document.createElement("button");
+                        btn.textContent = "View Code";
+                        btn.className = "student-btn";
+                        btn.onclick = () => fetchStudentCode(student_id);
+
+                        studentDiv.appendChild(studentText);
+                        studentDiv.appendChild(btn);
+                        studentList.appendChild(studentDiv);
+                    }
+                });
+            } catch (error) {
+                console.error("Error fetching student list:", error);
+                document.getElementById("student-list").innerHTML = "<p style='color: red;'>Error loading students.</p>";
+            }
+        }
+
+        async function fetchStudentCode(studentId) {
+            try {
+                let response = await fetch(`/admin/get_submits/${studentId}`);
+                if (!response.ok) throw new Error("Failed to fetch student code.");
+                
+                let code = await response.text();
+                document.getElementById("code-view").textContent = code;
+            } catch (error) {
+                console.error("Error fetching student code:", error);
+                document.getElementById("code-view").textContent = "Error loading code.";
+            }
+        }
+
+        fetchExamInfo();
+        fetchStudentListFromCSV();
+        setInterval(fetchStudentListFromCSV, 5000);
+    </script>
+</body>
+</html>
