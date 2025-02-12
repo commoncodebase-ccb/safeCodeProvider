@@ -5,6 +5,7 @@ from django.http import JsonResponse
 import json
 import os
 from django.conf import settings
+import csv
 
 CONFIG_FILE = os.path.join(settings.BASE_DIR, 'config.json')
 
@@ -98,3 +99,25 @@ def start_exam(request):
         return JsonResponse({"message": "Sınav başarıyla oluşturuldu!", "exam_password": exam_password})
 
     return JsonResponse({"error": "Geçersiz istek!"}, status=400)
+
+def submits_page(request):
+    # config.json dosyasını oku
+    config_path = os.path.join(settings.BASE_DIR, "config.json")
+    with open(config_path, "r", encoding="utf-8") as config_file:
+        config_data = json.load(config_file)
+    exam_password = config_data.get("exam_password", "Not Found")
+
+    # student_list klasöründeki ilk .csv dosyasını bul
+    student_list_path = os.path.join(settings.MEDIA_ROOT, "student_list")
+    student_file = next((f for f in os.listdir(student_list_path) if f.endswith(".csv")), None)
+
+    students = []
+    if student_file:
+        csv_path = os.path.join(student_list_path, student_file)
+        with open(csv_path, "r", encoding="utf-8") as file:
+            reader = csv.reader(file)
+            for row in reader:
+                if len(row) == 2:  # Beklenen format: "id, name"
+                    students.append({"id": row[0], "name": row[1]})
+
+    return render(request, "submits_page.html", {"exam_password": exam_password, "students": students})
