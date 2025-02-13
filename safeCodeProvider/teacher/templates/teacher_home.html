@@ -6,19 +6,21 @@
     <link rel="stylesheet" type="text/css" href="/static/teacher/teacher_home.css">
     <meta name="csrf-token" content="{{ csrf_token }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-
-
-    <title>Teacher Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch&family=Lexend+Deca:wght@300&family=Nova+Square&family=Unbounded&display=swap" rel="stylesheet">  
+      <title>Teacher Panel</title>
 </head>
 <body>
-    <h2>Teacher Panel</h2>
-
+    <div class="navbar">
+    <h2 style="text-align: center; font-family: Unbounded, serif;">Safe Code Provider | Teacher Panel</h2>
+    </div>
     <div class="upload-container">
         <!-- Student List Upload -->
         <div class="upload-box">
             <h3>Add Student List</h3>
-            <label for="student_list" class="custom-file-label">
-                <i class="fa-solid fa-upload"></i> Choose CSV
+            <label for="student_list" style="color: #ff4d00;" class="custom-file-label">
+                <i  class="fa-solid fa-upload"></i> Choose CSV
             </label>
             <input type="file" id="student_list" class="file-input" accept=".csv" onchange="updateFileName(this)">
             <div id="student_list_name" class="file-name">No file chosen</div>
@@ -27,7 +29,7 @@
         <!-- Exam Instruction Upload -->
         <div class="upload-box">
             <h3>Add Exam Instruction</h3>
-            <label for="exam_instruction" class="custom-file-label">
+            <label for="exam_instruction" style="color: #ff4d00"; class="custom-file-label">
                 <i class="fa-solid fa-upload"></i> Choose PDF
             </label>
             <input type="file" id="exam_instruction" class="file-input" accept=".pdf" onchange="updateFileName(this)">
@@ -37,7 +39,7 @@
         <!-- Assignment File Upload -->
         <div class="upload-box">
             <h3>Add Assignment File</h3>
-            <label for="assignment_file" class="custom-file-label">
+            <label for="assignment_file" style="color: #ff4d00" class="custom-file-label">
                 <i class="fa-solid fa-upload"></i> Choose Code
             </label>
             <input type="file" id="assignment_file" class="file-input" accept=".py,.java,.c" onchange="updateFileName(this)">
@@ -47,28 +49,31 @@
     
     
 
-    <button onclick="uploadAllFiles()">Tüm Dosyaları Yükle</button>
+    <button style="margin-left: 856px;"  onclick="uploadAllFiles()">Upload All Files</button>
 
     <br><br>
 
-    <div class="form-container">
+    <div class="form-container" style="color: #000; font-weight: 700;">
         <div class="form-control">
             <label for="exam_time">Time:</label>
-            <input type="text" id="exam_time">
+            <input style="height: 50px;" type="text" id="exam_time">
         </div>
     
         <div class="form-control">
             <label for="exam_name">Exam Name:</label>
-            <input type="text" id="exam_name">
+            <input style="height: 50px;" type="text" id="exam_name">
         </div>
     
         <div class="form-control">
             <label for="output_directory">Output Directory:</label>
-            <input type="text" id="output_directory">
+            <input style="height: 50px;" type="text" id="output_directory">
         </div>
     
-        <button onclick="startExam()">Start Assignment</button>
+        <button  onclick="startExam()">Start Assignment</button>
     </div>
+    <footer style="font-family: Unbounded, serif;">
+        <p style="font-family: Unbounded, serif;">CodeCommonBase</p>
+    </footer>
 
     <script>
         /*function uploadFile(inputId, fileType) {
@@ -162,7 +167,7 @@
 
 
             if (!time || !exam_name) {
-                alert("Lütfen sınav adı ve süresini girin.");
+                alert("Please enter exam time or exam name.");
                 return;
             }
 
@@ -189,7 +194,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                alert("Sınav oluşturuldu!\nSınav Şifresi: " + password);
+                alert("Exam Created!\nExam Password: " + password);
             })
             .catch(error => console.error(error));
         }
