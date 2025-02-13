@@ -36,17 +36,19 @@ def student_control(request):  # Öğrenci girişini ve doğrulamasını yapan f
 
         # Öğrencinin listede olup olmadığını kontrol et
         try:
-            with open(student_list_file, 'r') as csvfile:  
-                reader = csv.DictReader(csvfile)  
+            with open(student_list_file, 'r', encoding='utf-8') as csvfile:  
+                reader = csv.reader(csvfile)  
+                
+                # İlk satırı başlık olarak alma, tüm satırları kontrol et
                 student_exists = any(
-                    row['student_id'] == student_id and row['name'].lower() == student_name.lower()
+                    row[0] == student_id and row[1].lower() == student_name.lower() 
                     for row in reader
                 )
         except FileNotFoundError:
             return JsonResponse({'status': 'error', 'message': 'Student list file not found'})  
 
         if not student_exists:  
-            return JsonResponse({'status': 'error', 'message': 'Student not found in the list'})
+            return JsonResponse({'status': 'error', 'message': 'Student not found in the list'})  
 
         # Öğrenci için klasör oluştur
         uploads_path = os.path.join(settings.BASE_DIR, 'uploads')  
