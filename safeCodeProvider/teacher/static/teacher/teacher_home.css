@@ -1,9 +1,22 @@
+*{
+    font-family: "Chakra Petch", serif;
+    margin:0;
+    padding:0;
+    box-sizing: border-box;
+
+  }
 body {
-    background-color: #052756; /* Galaxy blue */
+    background-color: #f3f3f3; /* Galaxy blue */
     color: white;
-    font-family: Arial, sans-serif;
-    margin: 40;
-    padding: 0;
+    justify-content: center;
+    align-items: center;
+
+}
+.navbar{
+    background-color: #181d24;
+    height: 70px;
+    text-align: center;
+    align-content: center;
 }
 
 .upload-container {
@@ -14,24 +27,25 @@ body {
 }
 
 .upload-box {
-    background-color: #2986BF; /* Light blue */
+    background-color: #181d24;
     border-radius: 12px;
-    padding: 80px;
+    padding: 70px;
     text-align: center;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
     width: 300px;
 }
 
 .upload-box h3 {
-    margin-bottom: 15px;
-    color: #000;
+    
+    color: #fff;
 }
 
 .custom-file-label {
     display: block;
-    margin-bottom: 10px;
+    margin-top: 30px;
     cursor: pointer;
-    color: #000;
+    color: #fff;
+    text-align: center;
 }
 
 .file-input {
@@ -41,6 +55,7 @@ body {
 .file-name {
     margin-top: 10px;
     font-size: 14px;
+    text-align: center;
 }
 
 .form-container {
@@ -71,25 +86,33 @@ text-align: left;
 
 input {
 padding: 20px;
-border-radius: 20px;
+border-radius: 10px;
 border: 1px solid #ccc;
 flex: 2; /* Input takes up 2 parts of the row */
-font-size: 17px;
+font-size: 18px;
 margin-top: 10px; /* Moves input slightly downward */
 margin-right: 13px; 
 }
 button {
 margin-top: 20px;
 padding: 10px 20px;
-background-color: #1E90FF;
-color: white;
+background-color: #ff4d00; /* Galaxy blue */
+color: rgb(255, 255, 255);
 border: none;
 border-radius: 8px;
 cursor: pointer;
 font-size: 23px;
-margin-left: 110px;
 }
 
 button:hover {
 background-color: #4682B4;
+}
+footer {
+    background-color: #181d24;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
 }
