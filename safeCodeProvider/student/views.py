@@ -4,6 +4,8 @@ import json
 from django.shortcuts import render 
 from django.http import JsonResponse  
 from django.conf import settings
+import PyPDF2  # PDF dosyalarını okumak için gerekli
+
 
 def student_control(request):  # Öğrenci girişini ve doğrulamasını yapan fonksiyon
     if request.method == 'POST':  
@@ -65,6 +67,8 @@ def student_login(request):
 
 def exam_page(request):
     config_path = os.path.join(settings.BASE_DIR, 'config.json')
+    pdf_text = "No instructions available."
+
     try:
         with open(config_path, 'r') as config_file:
             config_data = json.load(config_file)
@@ -72,4 +76,17 @@ def exam_page(request):
     except FileNotFoundError:
         exam_time = 10  # Varsayılan olarak 10 dakika
 
-    return render(request, 'exam_page.html', {'exam_time': exam_time})
+    # PDF Dosyasını Oku
+    pdf_dir = os.path.join(settings.MEDIA_ROOT, 'exam_instruction')
+    
+    try:
+        pdf_files = [f for f in os.listdir(pdf_dir) if f.endswith('.pdf')]
+        if pdf_files:
+            pdf_path = os.path.join(pdf_dir, pdf_files[0])  # İlk PDF dosyasını al
+            with open(pdf_path, "rb") as pdf_file:
+                reader = PyPDF2.PdfReader(pdf_file)
+                pdf_text = "\n".join([page.extract_text() for page in reader.pages if page.extract_text()])
+    except Exception as e:
+        pdf_text = f"Error loading instructions: {str(e)}"
+
+    return render(request, 'exam_page.html', {'exam_time': exam_time, 'pdf_text': pdf_text})
