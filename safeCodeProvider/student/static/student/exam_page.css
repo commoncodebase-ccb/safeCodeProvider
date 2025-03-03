@@ -10,11 +10,11 @@ body {
 }
 
 .header {
-    background-color: #052756;
+    background-color: #181d24;
     color: white;
-    padding: 10px;
+    padding: 5px;
     text-align: center;
-    font-size: 20px;
+    font-size: 15px;
     position: relative;
     flex-shrink: 0; /* Header'ın küçülmesini engelle */
 }
@@ -92,14 +92,16 @@ body {
 }
 
 button {
+    margin-top: 20px;
     padding: 10px 20px;
+    background-color: #ff4d00; /* Galaxy blue */
+    color: rgb(255, 255, 255);
     border: none;
-    background-color: #052756;
-    color: white;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
-}
-
-button:hover {
-    background-color: #052756;
-}
+    font-size: 23px;
+    }
+    
+    button:hover {
+    background-color: #4682B4;
+    }

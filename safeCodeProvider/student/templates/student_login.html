@@ -6,9 +6,15 @@
     <link rel="stylesheet" type="text/css" href="/static/student/student_login.css"> 
     <meta name="csrf-token" content="{{ csrf_token }}"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"> 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch&family=Lexend+Deca:wght@300&family=Nova+Square&family=Unbounded&display=swap" rel="stylesheet"> 
     <title>Student Login</title> 
 </head>
 <body>
+    <div class="navbar">
+        <h2 style="text-align: center; font-family: Unbounded, serif;">Safe Code Provider | Student Panel</h2>
+        </div>
     <div class="login-container"> 
         <h1>Student Login</h1> 
 
@@ -29,6 +35,9 @@
             <button onclick="student_control()" type="submit">Login</button> <!-- Giriş butonu, tıklanınca student_control fonksiyonunu çağırır -->
         </form>
     </div>
+    <footer style="font-family: Unbounded, serif;">
+        <p style="font-family: Unbounded, serif;">CommonCodeBase</p>
+    </footer>
 
     <script>
         function student_control(){

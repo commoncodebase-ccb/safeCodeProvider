@@ -1,11 +1,37 @@
+* {
+    font-family: "Chakra Petch", serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f9;
     display: flex;
-    justify-content: center;
+    flex-direction: column; /* Navbarı en üste sabitlemek için */
     align-items: center;
+    justify-content: center;
     height: 100vh;
     margin: 0;
+}
+
+.navbar {
+    width: 100%;
+    background-color: #181d24;
+    height: 70px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed; /* Navbarı ekranda sabitlemek için */
+    top: 0;
+    left: 0;
+}
+
+.navbar h2 {
+    color: white;
+    font-family: 'Unbounded', serif;
+    font-size: 20px;
 }
 
 .login-container {
@@ -13,8 +39,10 @@ body {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    width: 350px; /* Genişliği artırarak daha dengeli bir görüntü sağladık */
+    width: 350px;
     text-align: center;
+    margin-top: 100px; /* Navbar ile üst kısmın çakışmasını önlemek için */
+    margin-bottom: 80px;
 }
 
 h1 {
@@ -25,30 +53,31 @@ h1 {
 form {
     display: flex;
     flex-direction: column;
-    align-items: center; /* Inputları ortalamak için eklendi */
+    align-items: center;
 }
 
 label {
     display: block;
     text-align: left;
-    width: 100%; /* Genişliği tam alana yay */
+    width: 100%;
     margin-bottom: 5px;
     font-size: 14px;
 }
 
-input[type="text"], input[type="password"] {
-    width: 94%; /* Input genişliğini biraz daralttık, form içine dengeli yerleşmesi için */
+input[type="text"], 
+input[type="password"] {
+    width: 94%;
     padding: 10px;
     margin-bottom: 20px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    text-align: center; /* Yazıyı ortalamak için */
+    text-align: center;
 }
 
 button {
     width: 90%;
     padding: 10px;
-    background-color: #052756;
+    background-color: #ff4d00;
     color: white;
     border: none;
     border-radius: 5px;
@@ -57,11 +86,21 @@ button {
 }
 
 button:hover {
-    background-color: #041c3a;
+    background-color: #4682B4;
 }
 
 .error-message {
     color: red;
     font-size: 14px;
     margin-bottom: 15px;
+}
+
+footer {
+    background-color: #181d24;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
 }
