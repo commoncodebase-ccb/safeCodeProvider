@@ -63,7 +63,15 @@ body {
     border: 1px solid #ddd;
     border-radius: 5px;
 }
-
+.editor-container {
+    flex-grow: 1;
+    min-height: 300px;
+    max-height: 80vh;
+    position: relative;
+    border: 1px solid #ddd;
+    resize: vertical;
+    overflow: hidden;
+}
 .code-area {
     flex-grow: 1;
     padding: 10px;
@@ -102,6 +110,6 @@ button {
     font-size: 23px;
     }
     
-    button:hover {
+button:hover {
     background-color: #4682B4;
-    }
+}

@@ -4,52 +4,106 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="/static/student/exam_page.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch&family=Lexend+Deca:wght@300&family=Nova+Square&family=Unbounded&display=swap" rel="stylesheet"> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/loader.js"></script>
     <title>Exam Page</title>
 </head>
 <body>
     <div class="header">
-        <span><h2 style="text-align: center; font-family: Unbounded, serif;">Safe Code Provider | Exam Page </h2></span>
-        <span class="timer">Time: 01:59:59</span>
+        <h2 style="text-align: center; font-family: Unbounded, serif;">Safe Code Provider | Exam Page</h2>
+        <span class="timer" id="timer-display">Time: 01:59:59</span>
     </div>
     <div class="container">
-        <!-- Sol tarafta PDF talimatlarını gösterecek alan -->
         <div class="instruction">
             <h3>Exam Instructions</h3>
             <div class="instruction-content">
                 <p>{{ pdf_text|linebreaks }}</p>
             </div>
         </div>
-    
-        <div class="editor">
-            <textarea class="code-area" placeholder="Write your code here..."></textarea>
-            <div class="output">Output will be displayed here...</div>
-        </div>
+        
+        <div class="editor-container" id="editor-container"></div>
+        <div class="output">Output will be displayed here...</div>
     </div>
     
-
     <div class="footer">
-        <button>Run</button>
-        <button>Submit</button>
+        <button id="run-btn">Run</button>
+        <button id="submit-btn">Submit</button>
     </div>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            let timeLeft = JSON.parse('{{ exam_time|escapejs }}') * 60;  // Güvenli JSON dönüşümü
     
-            function updateTimer() {
-                let minutes = Math.floor(timeLeft / 60);
-                let seconds = timeLeft % 60;
-                document.querySelector(".timer").innerText = `Time: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-                if (timeLeft > 0) {
-                    timeLeft--;
-                    setTimeout(updateTimer, 1000);
+    <script>
+        let studentId = "{{ student_id }}";
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+            var editorContainer = document.getElementById('editor-container');
+            var editor = monaco.editor.create(editorContainer, {
+                value: "# Write your code here...",
+                language: "{{ editor_type }}",
+                theme: "vs-dark",
+                automaticLayout: true
+            });
+            
+            function resizeEditor() {
+                editor.layout();
+            }
+            new ResizeObserver(resizeEditor).observe(editorContainer);
+
+            async function runCode() {
+                const code = editor.getValue();
+                try {
+                    const response = await fetch('/student/exam_run/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ student_id: studentId, code: code })
+                    });
+                    const result = await response.json();
+                    document.querySelector('.output').textContent = result.output;
+                } catch (error) {
+                    console.error("Run error:", error);
+                    document.querySelector('.output').textContent = "Run failed! Check console for details.";
                 }
             }
-    
-            updateTimer();
+
+            async function submitCode() {
+                if (confirm("Are you sure you want to submit? This will end your exam.")) {
+                    const code = editor.getValue();
+                    try {
+                        const response = await fetch('/student/exam_submit/', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ student_id: studentId, code: code })
+                        });
+                        const result = await response.json();
+                        if (result.status === 'success') {
+                            alert("Exam submitted successfully!");
+                            window.location.href = '/';
+                        } else {
+                            alert("Submission failed: " + result.message);
+                        }
+                    } catch (error) {
+                        console.error("Submit error:", error);
+                        alert("Error submitting exam. Check console for details.");
+                    }
+                }
+            }
+
+            document.getElementById('run-btn').addEventListener('click', runCode);
+            document.getElementById('submit-btn').addEventListener('click', submitCode);
         });
+
+        let timeLeft = JSON.parse('{{ exam_time|escapejs }}') * 60;
+        function updateTimer() {
+            let minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+            document.getElementById("timer-display").innerText = `Time: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            if (timeLeft > 0) {
+                timeLeft--;
+                setTimeout(updateTimer, 1000);
+            } else {
+                alert("Time is up! You will be logged out.");
+                window.location.href = "/";
+            }
+        }
+        updateTimer();
     </script>
 </body>
 </html>
+
