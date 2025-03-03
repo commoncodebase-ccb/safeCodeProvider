@@ -1,11 +1,15 @@
 from django.shortcuts import render
-
-from django.shortcuts import render
 from django.http import JsonResponse
 import json
 import os
 from django.conf import settings
 import csv
+
+
+import docker
+from django.views.decorators.csrf import csrf_exempt
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 CONFIG_FILE = os.path.join(settings.BASE_DIR, 'config.json')
 
@@ -50,6 +54,7 @@ def upload_files(request):
 
     return JsonResponse({'error': 'Geçersiz istek'}, status=400)
 
+@csrf_exempt
 def start_exam(request):
     if request.method == "POST":
         exam_name = request.POST.get("exam_name")
@@ -96,7 +101,73 @@ def start_exam(request):
         with open(config_path, "w", encoding="utf-8") as file:
             json.dump(exam_data, file, indent=4, ensure_ascii=False)
 
-        return JsonResponse({"message": "Sınav başarıyla oluşturuldu!", "exam_password": exam_password})
+        
+        # 1. config.json dosyasını oku
+        config_path = os.path.join(os.getcwd(), "config.json")
+        with open(config_path, "r", encoding="utf-8") as file:
+            config = json.load(file)
+
+        exam_type = config.get("type", "py").lower()  # Varsayılan Python
+        exam_name = config.get("exam_name", "default_exam")
+        
+        # 2. Dockerfile seçimi
+        dockerfile_map = {
+            "py": "python.Dockerfile",
+            "java": "java.Dockerfile",
+            "c": "c.Dockerfile"
+        }
+        
+        selected_dockerfile = dockerfile_map.get(exam_type)
+        if not selected_dockerfile:
+            return JsonResponse({"error": f"Unsupported exam type: {exam_type}"}, status=400)
+        
+        dockerfile_path = os.path.join(os.getcwd(), "docker", selected_dockerfile)
+        if not os.path.exists(dockerfile_path):
+            return JsonResponse({"error": f"Dockerfile not found: {selected_dockerfile}"}, status=500)
+
+        # 3. Docker Image oluştur
+        image_name = f"safe_code_{exam_type}_image"
+        client = docker.from_env()
+        
+        try:
+            client.images.build(path=os.path.join(os.getcwd(), "docker"), dockerfile=selected_dockerfile, tag=image_name)
+        except Exception as e:
+            return JsonResponse({"error": f"Image build failed: {str(e)}"}, status=500)
+
+        # 4. Öğrenci listesini oku
+        student_list_file = request.FILES.get("student_list")
+        if not student_list_file:
+            return JsonResponse({"error": "No student list provided"}, status=400)
+        
+        file_path = os.path.join(os.getcwd(), "media", "student_list", "students.csv")
+
+
+        student_ids = []
+        try:
+            with open(file_path, newline='', encoding='utf-8') as csvfile:
+                reader = csv.reader(csvfile)
+                for row in reader:
+                    if row:
+                        student_ids.append(row[0].strip())  # CSV'deki ilk sütun öğrenci ID'si
+        except Exception as e:
+            return JsonResponse({"error": f"Failed to read student list: {str(e)}"}, status=500)
+
+        # 5. Öğrenciler için container oluştur
+        container_names = []
+        for student_id in student_ids:
+            container_name = f"{exam_name}_student_{student_id}"
+
+            try:
+                container = client.containers.run(
+                    image_name,
+                    detach=True,
+                    name=container_name
+                )
+                container_names.append(container_name)
+            except Exception as e:
+                return JsonResponse({"error": f"Container creation failed for {student_id}: {str(e)}"}, status=500)
+
+        return JsonResponse({"message": "Containers created successfully", "containers": container_names})
 
     return JsonResponse({"error": "Geçersiz istek!"}, status=400)
 
