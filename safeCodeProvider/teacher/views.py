@@ -57,119 +57,92 @@ def upload_files(request):
 @csrf_exempt
 def start_exam(request):
     if request.method == "POST":
-        exam_name = request.POST.get("exam_name")
-        exam_time = request.POST.get("time")
-        exam_password = request.POST.get("exam_password")  # Rastgele şifre
+        try:
+            exam_name = request.POST.get("exam_name")
+            exam_time = request.POST.get("time")
+            exam_password = request.POST.get("exam_password")
 
-        # Sınav bilgilerini kaydedeceğimiz dosya
-        config_path = "config.json"
+            if not exam_name or not exam_time or not exam_password:
+                return JsonResponse({"error": "Eksik sınav bilgisi gönderildi."}, status=400)
 
-        # Mevcut sınavları yükle
-        if os.path.exists(config_path):
-            with open(config_path, "r", encoding="utf-8") as file:
-                try:
-                    exam_data = json.load(file)
-                except json.JSONDecodeError:
-                    exam_data = {}
-        else:
+            config_path = "config.json"
+
             exam_data = {}
+            if os.path.exists(config_path):
+                with open(config_path, "r", encoding="utf-8") as file:
+                    try:
+                        exam_data = json.load(file)
+                    except json.JSONDecodeError:
+                        exam_data = {}
+
+            assignment_folder = "media/assignment_file"
+            file_type = "unknown"
+
+            if os.path.exists(assignment_folder):
+                files = os.listdir(assignment_folder)
+                if files:
+                    latest_file = max(
+                        [os.path.join(assignment_folder, f) for f in files],
+                        key=os.path.getctime
+                    )
+                    file_extension = os.path.splitext(latest_file)[1].lstrip(".")
+                    file_type = file_extension if file_extension else "unknown"
+
+            exam_data.update({
+                "exam_name": exam_name,
+                "exam_time": exam_time,
+                "exam_password": exam_password,
+                "type": file_type
+            })
+
+            with open(config_path, "w", encoding="utf-8") as file:
+                json.dump(exam_data, file, indent=4, ensure_ascii=False)
+
+            return handle_docker_operations(config_path, request)
+
+        except Exception as e:
+            return JsonResponse({"error": f"Sunucu hatası: {str(e)}"}, status=500)
 
 
 
-        assignment_folder = "media/assignment_file"
-        file_type = "unknown"
-
-        if os.path.exists(assignment_folder):
-            files = os.listdir(assignment_folder)
-            if files:  # Eğer klasörde dosya varsa
-                latest_file = max(
-                    [os.path.join(assignment_folder, f) for f in files],
-                    key=os.path.getctime
-                )  # En son yüklenen dosyayı al
-                file_extension = os.path.splitext(latest_file)[1].lstrip(".")  # Uzantıyı al
-                file_type = file_extension if file_extension else "unknown"
-
-
-        # Yeni sınavı ekleyelim
-        exam_data["exam_name"] = exam_name
-        exam_data["exam_time"] = exam_time
-        exam_data["exam_password"] = exam_password
-        exam_data["type"] = file_type  # Dosya tipi eklendi
-
-
-        # JSON dosyasına yazalım
-        with open(config_path, "w", encoding="utf-8") as file:
-            json.dump(exam_data, file, indent=4, ensure_ascii=False)
-
-        
-        # 1. config.json dosyasını oku
-        config_path = os.path.join(os.getcwd(), "config.json")
+def handle_docker_operations(config_path, request):
+    try:
+        # 📌 1. config.json dosyasını oku
         with open(config_path, "r", encoding="utf-8") as file:
             config = json.load(file)
 
-        exam_type = config.get("type", "py").lower()  # Varsayılan Python
+        exam_type = config.get("type", "py").lower()
         exam_name = config.get("exam_name", "default_exam")
-        
-        # 2. Dockerfile seçimi
+
+        # 📌 2. Dockerfile seçimi
         dockerfile_map = {
             "py": "python.Dockerfile",
             "java": "java.Dockerfile",
             "c": "c.Dockerfile"
         }
-        
+
         selected_dockerfile = dockerfile_map.get(exam_type)
         if not selected_dockerfile:
-            return JsonResponse({"error": f"Unsupported exam type: {exam_type}"}, status=400)
-        
+            return JsonResponse({"error": f"Desteklenmeyen sınav türü: {exam_type}"}, status=400)
+
         dockerfile_path = os.path.join(os.getcwd(), "docker", selected_dockerfile)
         if not os.path.exists(dockerfile_path):
-            return JsonResponse({"error": f"Dockerfile not found: {selected_dockerfile}"}, status=500)
+            return JsonResponse({"error": f"Dockerfile bulunamadı: {selected_dockerfile}"}, status=500)
 
-        # 3. Docker Image oluştur
+        # 📌 3. Docker Image oluştur
         image_name = f"safe_code_{exam_type}_image"
         client = docker.from_env()
-        
+
         try:
             client.images.build(path=os.path.join(os.getcwd(), "docker"), dockerfile=selected_dockerfile, tag=image_name)
         except Exception as e:
-            return JsonResponse({"error": f"Image build failed: {str(e)}"}, status=500)
+            return JsonResponse({"error": f"Image oluşturma başarısız: {str(e)}"}, status=500)
 
-        # 4. Öğrenci listesini oku
-        student_list_file = request.FILES.get("student_list")
-        if not student_list_file:
-            return JsonResponse({"error": "No student list provided"}, status=400)
-        
-        file_path = os.path.join(os.getcwd(), "media", "student_list", "students.csv")
+        return JsonResponse({"message": "Sınav başarıyla başlatıldı", "containers": container_names})
 
+    except Exception as e:
+        return JsonResponse({"error": f"Docker işlemleri sırasında hata oluştu: {str(e)}"}, status=500)
 
-        student_ids = []
-        try:
-            with open(file_path, newline='', encoding='utf-8') as csvfile:
-                reader = csv.reader(csvfile)
-                for row in reader:
-                    if row:
-                        student_ids.append(row[0].strip())  # CSV'deki ilk sütun öğrenci ID'si
-        except Exception as e:
-            return JsonResponse({"error": f"Failed to read student list: {str(e)}"}, status=500)
-
-        # 5. Öğrenciler için container oluştur
-        container_names = []
-        for student_id in student_ids:
-            container_name = f"{exam_name}_student_{student_id}"
-
-            try:
-                container = client.containers.run(
-                    image_name,
-                    detach=True,
-                    name=container_name
-                )
-                container_names.append(container_name)
-            except Exception as e:
-                return JsonResponse({"error": f"Container creation failed for {student_id}: {str(e)}"}, status=500)
-
-        return JsonResponse({"message": "Containers created successfully", "containers": container_names})
-
-    return JsonResponse({"error": "Geçersiz istek!"}, status=400)
 
 def submits_page(request):
     # config.json dosyasını oku
