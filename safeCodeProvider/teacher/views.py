@@ -123,22 +123,22 @@ def handle_docker_operations(config_path, request):
 
         selected_dockerfile = dockerfile_map.get(exam_type)
         if not selected_dockerfile:
-            return JsonResponse({"error": f"Desteklenmeyen sınav türü: {exam_type}"}, status=400)
+            return JsonResponse({"error": f"Unsupported exam type: {exam_type}"}, status=400)
 
         dockerfile_path = os.path.join(os.getcwd(), "docker", selected_dockerfile)
         if not os.path.exists(dockerfile_path):
-            return JsonResponse({"error": f"Dockerfile bulunamadı: {selected_dockerfile}"}, status=500)
+            return JsonResponse({"error": f"Could not fint Dockerfile: {selected_dockerfile}"}, status=500)
 
         # 📌 3. Docker Image oluştur
         image_name = f"safe_code_{exam_type}_image"
         client = docker.from_env()
 
         try:
-            client.images.build(path=os.path.join(os.getcwd(), "docker"), dockerfile=selected_dockerfile, tag=image_name)
+            client.images.build(path=os.path.join(os.getcwd(), "docker"), dockerfile=selected_dockerfile, tag=image_name)# building image
         except Exception as e:
-            return JsonResponse({"error": f"Image oluşturma başarısız: {str(e)}"}, status=500)
-
-        return JsonResponse({"message": "Sınav başarıyla başlatıldı", "containers": container_names})
+            return JsonResponse({"error": f"Creating image is unsuccessful: {str(e)}"}, status=500)
+        #creating container for all students in student list
+        return JsonResponse({"message": "Exam is started successfully", "containers": container_names})
 
     except Exception as e:
         return JsonResponse({"error": f"Docker işlemleri sırasında hata oluştu: {str(e)}"}, status=500)

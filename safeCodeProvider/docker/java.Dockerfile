@@ -1,11 +1,10 @@
-
 FROM openjdk:17-jdk-slim
 
 
 WORKDIR /app
 
 
-COPY . .
+COPY safecodeprovider/uploads /app/uploads
 
 
-CMD ["sh", "-c", "javac Main.java && java Main"]
+CMD ["sh", "-c", "javac \"${STUDENT_DIR}/script.java\" && java -cp \"${STUDENT_DIR}\" script"]
