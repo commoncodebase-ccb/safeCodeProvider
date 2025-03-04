@@ -2,7 +2,7 @@ FROM python:3.9-alpine
 
 WORKDIR /app
 
-COPY safecodeprovider/uploads /app/uploads
+COPY . /app
 
 CMD ["sh", "-c", "python \"${STUDENT_DIR}/script.py\""]
 
