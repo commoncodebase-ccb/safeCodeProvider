@@ -4,6 +4,7 @@ import json
 import os
 from django.conf import settings
 import csv
+import shutil
 
 
 import docker
@@ -112,34 +113,66 @@ def handle_docker_operations(config_path, request):
             config = json.load(file)
 
         exam_type = config.get("type", "py").lower()
-        exam_name = config.get("exam_name", "default_exam")
 
         # 📌 2. Dockerfile seçimi
         dockerfile_map = {
-            "py": "python.Dockerfile",
-            "java": "java.Dockerfile",
-            "c": "c.Dockerfile"
+            "py": "docker/python.Dockerfile",
+            "java": "docker/java.Dockerfile",
+            "c": "docker/c.Dockerfile"
         }
+        dockerfile_path = os.path.join(os.getcwd(),dockerfile_map.get(exam_type))
 
-        selected_dockerfile = dockerfile_map.get(exam_type)
-        if not selected_dockerfile:
-            return JsonResponse({"error": f"Unsupported exam type: {exam_type}"}, status=400)
+        if not dockerfile_path or not os.path.exists(dockerfile_path):
+            return JsonResponse({"error": f"Unsupported or missing Dockerfile for exam type: {exam_type}"}, status=400)
 
-        dockerfile_path = os.path.join(os.getcwd(), "docker", selected_dockerfile)
-        if not os.path.exists(dockerfile_path):
-            return JsonResponse({"error": f"Could not fint Dockerfile: {selected_dockerfile}"}, status=500)
+        # CSV dosyasının olduğu klasör
+        csv_dir = "media/student_list"
+        csv_files = os.listdir(csv_dir)
+        if not csv_files:
+            return JsonResponse({"error": "No CSV file found in student_list folder"}, status=400)
+        csv_file_path = os.path.join(csv_dir, csv_files[0])
 
-        # 📌 3. Docker Image oluştur
-        image_name = f"safe_code_{exam_type}_image"
-        client = docker.from_env()
+        # script.py dosyasının olduğu klasör
+        script_dir = "media/assignment_file"
+        script_files = os.listdir(script_dir)
+        if not script_files:
+            return JsonResponse({"error": "No assignment file found in assignment_file folder"}, status=400)
+        script_file_path = os.path.join(script_dir, script_files[0])
 
-        try:
-            client.images.build(path=os.path.join(os.getcwd(), "docker"), dockerfile=selected_dockerfile, tag=image_name)# building image
-        except Exception as e:
-            return JsonResponse({"error": f"Creating image is unsuccessful: {str(e)}"}, status=500)
-        #creating container for all students in student list
-        return JsonResponse({"message": "Exam is started successfully", "containers": container_names})
+        # "uploads" klasörü yoksa oluştur
+        uploads_dir = "uploads"
+        os.makedirs(uploads_dir, exist_ok=True)
 
+        # CSV dosyasını oku ve öğrenci ID_İsim formatında listeye al
+        students = []
+        with open(csv_file_path, "r", encoding="utf-8") as file:
+            reader = csv.reader(file)
+            for row in reader:
+                if len(row) >= 2:
+                    student_id = row[0]
+                    student_name = row[1].strip().lower()
+                    folder_name = f"{student_id}_{student_name}"
+                    students.append(folder_name)
+
+        # Öğrenci klasörlerini oluştur ve dosyaları kopyala
+        for student in students:
+            folder_path = os.path.join(uploads_dir, student)
+            os.makedirs(folder_path, exist_ok=True)
+                       
+            # Dosyaları güvenilir şekilde kopyala
+            shutil.copy(dockerfile_path, os.path.join(folder_path, "Dockerfile"))
+            shutil.copy(script_file_path, os.path.join(folder_path, os.path.basename(script_file_path)))
+
+        # Docker image'leri oluştur
+        for student in students:
+            os.system(f"docker build -t {student} {os.path.join(uploads_dir, student)}")
+
+        # Docker container'ları çalıştır
+        for student in students:
+            os.system(f"docker run -d {student}")
+
+        return JsonResponse({"message": "Docker işlemleri başarıyla tamamlandı!"})
+    
     except Exception as e:
         return JsonResponse({"error": f"Docker işlemleri sırasında hata oluştu: {str(e)}"}, status=500)
 
