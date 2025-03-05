@@ -86,15 +86,17 @@ def start_exam(request):
                         [os.path.join(assignment_folder, f) for f in files],
                         key=os.path.getctime
                     )
-                    file_extension = os.path.splitext(latest_file)[1].lstrip(".")
-                    file_type = file_extension if file_extension else "unknown"
+                    file_name, file_extension = os.path.splitext(os.path.basename(latest_file))
+                    file_type = file_extension.lstrip(".") if file_extension else "unknown"
 
             exam_data.update({
                 "exam_name": exam_name,
                 "exam_time": exam_time,
                 "exam_password": exam_password,
-                "type": file_type
+                "file_name": file_name,  # Dosya adı
+                "type": file_type  # Dosya uzantısı
             })
+
 
             with open(config_path, "w", encoding="utf-8") as file:
                 json.dump(exam_data, file, indent=4, ensure_ascii=False)
