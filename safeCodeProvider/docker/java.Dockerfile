@@ -7,4 +7,4 @@ WORKDIR /app
 COPY . /app
 
 
-CMD ["sh", "-c", "javac \"${STUDENT_DIR}/script.java\" && java -cp \"${STUDENT_DIR}\" script"]
+CMD sh -c "javac /app/${folder_path}/${file_name}.java && java -cp /app/${folder_path} ${file_name}"

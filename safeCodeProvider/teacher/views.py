@@ -115,6 +115,7 @@ def handle_docker_operations(config_path, request):
             config = json.load(file)
 
         exam_type = config.get("type", "py").lower()
+        file_name = config.get("file_name", "script").lower()
 
         # 📌 2. Dockerfile seçimi
         dockerfile_map = {
@@ -134,7 +135,7 @@ def handle_docker_operations(config_path, request):
             return JsonResponse({"error": "No CSV file found in student_list folder"}, status=400)
         csv_file_path = os.path.join(csv_dir, csv_files[0])
 
-        # script.py dosyasının olduğu klasör
+        # script dosyasının olduğu klasör
         script_dir = "media/assignment_file"
         script_files = os.listdir(script_dir)
         if not script_files:
@@ -158,20 +159,39 @@ def handle_docker_operations(config_path, request):
 
         # Öğrenci klasörlerini oluştur ve dosyaları kopyala
         for student in students:
-            folder_path = os.path.join(uploads_dir, student)
+            folder_path = os.path.join(uploads_dir, student)#uploads/ID_name
             os.makedirs(folder_path, exist_ok=True)
-                       
-            # Dosyaları güvenilir şekilde kopyala
-            shutil.copy(dockerfile_path, os.path.join(folder_path, "Dockerfile"))
+            
+            with open(dockerfile_path, "r") as file:
+                dockerfile_lines = file.readlines()
+
+             # CMD komutunu öğrenciye özel hale getir
+            if exam_type == "py":
+                cmd_line = f'CMD ["/bin/sh", "-c", "python \"/uploads/{student}/{file_name}.py\""]\n'
+            elif exam_type == "java":
+                cmd_line = f'CMD ["/bin/sh", "-c", "javac /uploads/{student}/{file_name}.java && java -cp /uploads/{student} {file_name}"]\n'
+            elif exam_type == "c":
+                cmd_line = f'CMD ["/bin/sh", "-c", "gcc -o \"/uploads/{student}/{file_name}\" \"/uploads/{student}/{file_name}.c\" && \"/uploads/{student}/{file_name}\""]\n'
+            else:
+                return JsonResponse({"error": f"Unsupported file type: {exam_type}"}, status=400)
+
+            # Son satırı özel CMD ile değiştir
+            dockerfile_lines[-1] = cmd_line
+            
+            student_dockerfile_path = os.path.join(folder_path, "Dockerfile")
+            with open(student_dockerfile_path, "w") as file:
+                file.writelines(dockerfile_lines)
+
             shutil.copy(script_file_path, os.path.join(folder_path, os.path.basename(script_file_path)))
 
         # Docker image'leri oluştur
         for student in students:
-            os.system(f"docker build -t {student} {os.path.join(uploads_dir, student)}")
+            safe_student_name = student.replace("_", "-")
+            os.system(f"docker build -t {safe_student_name} {os.path.join(uploads_dir, student)}")
 
         # Docker container'ları çalıştır
         for student in students:
-            os.system(f"docker run -d {student}")
+            os.system(f"docker run -d {safe_student_name}")
 
         return JsonResponse({"message": "Docker işlemleri başarıyla tamamlandı!"})
     

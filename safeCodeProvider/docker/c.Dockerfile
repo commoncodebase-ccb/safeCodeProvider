@@ -10,4 +10,4 @@ WORKDIR /app
 COPY . /app
 
 
-CMD ["sh", "-c", "gcc -o \"${STUDENT_DIR}/script\" \"${STUDENT_DIR}/script.c\" && \"${STUDENT_DIR}/script\""]
+CMD ["sh", "-c", "gcc -o \"${folder_path}/${file_name}\" \"${folder_path}/${file_name}.c\" && \"${folder_path}/${file_name}\""]
