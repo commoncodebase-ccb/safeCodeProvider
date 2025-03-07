@@ -167,7 +167,7 @@ def handle_docker_operations(config_path, request):
 
              # CMD komutunu öğrenciye özel hale getir
             if exam_type == "py":
-                cmd_line = f'CMD ["/bin/sh", "-c", "python \"/uploads/{student}/{file_name}.py\""]\n'
+                cmd_line = f'CMD ["/bin/sh", "-c", "python {file_name}.py"]\n'
             elif exam_type == "java":
                 cmd_line = f'CMD ["/bin/sh", "-c", "javac /uploads/{student}/{file_name}.java && java -cp /uploads/{student} {file_name}"]\n'
             elif exam_type == "c":
@@ -191,7 +191,8 @@ def handle_docker_operations(config_path, request):
 
         # Docker container'ları çalıştır
         for student in students:
-            os.system(f"docker run -d {safe_student_name}")
+            safe_student_name = student.replace("_", "-")
+            os.system(f"docker run {safe_student_name}")
 
         return JsonResponse({"message": "Docker işlemleri başarıyla tamamlandı!"})
     

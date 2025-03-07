@@ -52,10 +52,10 @@ def student_control(request):  # Öğrenci girişini ve doğrulamasını yapan f
             return JsonResponse({'status': 'error', 'message': 'Student not found in the list'})  
 
         # Öğrenci için klasör oluştur
-        uploads_path = os.path.join(settings.BASE_DIR, 'uploads')  
-        os.makedirs(uploads_path, exist_ok=True)  
-        student_folder = os.path.join(uploads_path, f"{student_name}_{student_id}") 
-        os.makedirs(student_folder, exist_ok=True)
+        #uploads_path = os.path.join(settings.BASE_DIR, 'uploads')  
+        #os.makedirs(uploads_path, exist_ok=True)  
+        #student_folder = os.path.join(uploads_path, f"{student_name}_{student_id}") 
+        #os.makedirs(student_folder, exist_ok=True)
 
         return JsonResponse({'status': 'success', 'redirect_url': '/exam/'}) 
 
