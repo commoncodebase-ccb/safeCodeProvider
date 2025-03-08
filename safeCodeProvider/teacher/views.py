@@ -23,6 +23,15 @@ ALLOWED_EXTENSIONS = {
 def teacher_home(request):
     return render(request, 'teacher_home.html')
 
+def save_uploaded_file(uploaded_file, file_type):
+    save_path = os.path.join(settings.MEDIA_ROOT, file_type)
+    os.makedirs(save_path, exist_ok=True)
+    file_path = os.path.join(save_path, uploaded_file.name)
+    with open(file_path, 'wb+') as destination:
+        for chunk in uploaded_file.chunks():
+            destination.write(chunk)
+    return uploaded_file.name
+
 def upload_files(request):
     if request.method == 'POST':
         required_files = ['student_list', 'exam_instruction', 'assignment_file']
@@ -62,12 +71,21 @@ def start_exam(request):
             exam_name = request.POST.get("exam_name")
             exam_time = request.POST.get("time")
             exam_password = request.POST.get("exam_password")
+            student_list = request.FILES.get("student_list")
+            exam_instruction = request.FILES.get("exam_instruction")
+            assignment_file = request.FILES.get("assignment_file")
 
             if not exam_name or not exam_time or not exam_password:
                 return JsonResponse({"error": "Eksik sınav bilgisi gönderildi."}, status=400)
+            
+            if not student_list or not exam_instruction or not assignment_file:
+                return JsonResponse({"error": "Tüm dosyalar yüklenmelidir!"}, status=400)
+
+            student_list_name = save_uploaded_file(student_list, "student_list")
+            exam_instruction_name = save_uploaded_file(exam_instruction, "exam_instruction")
+            assignment_file_name = save_uploaded_file(assignment_file, "assignment_file")
 
             config_path = "config.json"
-
             exam_data = {}
             if os.path.exists(config_path):
                 with open(config_path, "r", encoding="utf-8") as file:
@@ -78,7 +96,6 @@ def start_exam(request):
 
             assignment_folder = "media/assignment_file"
             file_type = "unknown"
-
             if os.path.exists(assignment_folder):
                 files = os.listdir(assignment_folder)
                 if files:
@@ -94,9 +111,11 @@ def start_exam(request):
                 "exam_time": exam_time,
                 "exam_password": exam_password,
                 "file_name": file_name,  # Dosya adı
-                "type": file_type  # Dosya uzantısı
+                "type": file_type,  # Dosya uzantısı
+                "student_list": student_list_name,
+                "exam_instruction": exam_instruction_name,
+                "assignment_file": assignment_file_name
             })
-
 
             with open(config_path, "w", encoding="utf-8") as file:
                 json.dump(exam_data, file, indent=4, ensure_ascii=False)
