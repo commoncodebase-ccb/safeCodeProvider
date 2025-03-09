@@ -1,109 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="/static/student/exam_page.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/loader.js"></script>
-    <title>Exam Page</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="/static/student/exam_page.css">
+  <title>Exam Page</title>
+  <style>
+    /* Şık geçiş efektiyle tam ekran modunda editör */
+    .editor-fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100% !important;
+      height: 100% !important;
+      z-index: 1000;
+      background: white;
+      transition: all 0.3s ease;
+    }
+  </style>
 </head>
 <body>
-    <div class="header">
-        <h2 style="text-align: center; font-family: Unbounded, serif;">Safe Code Provider | Exam Page</h2>
-        <span class="timer" id="timer-display">Time: 01:59:59</span>
-    </div>
-    <div class="container">
-        <div class="instruction">
-            <h3>Exam Instructions</h3>
-            <div class="instruction-content">
-                <p>{{ pdf_text|linebreaks }}</p>
-            </div>
-        </div>
-        
-        <div class="editor-container" id="editor-container"></div>
-        <div class="output">Output will be displayed here...</div>
-    </div>
-    
-    <div class="footer">
-        <button id="run-btn">Run</button>
-        <button id="submit-btn">Submit</button>
-    </div>
-    
-    <script>
-        let studentId = "{{ student_id }}";
-        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs' } });
-        require(['vs/editor/editor.main'], function () {
-            var editorContainer = document.getElementById('editor-container');
-            var editor = monaco.editor.create(editorContainer, {
-                value: "# Write your code here...",
-                language: "{{ editor_type }}",
-                theme: "vs-dark",
-                automaticLayout: true
-            });
-            
-            function resizeEditor() {
-                editor.layout();
-            }
-            new ResizeObserver(resizeEditor).observe(editorContainer);
-
-            async function runCode() {
-                const code = editor.getValue();
-                try {
-                    const response = await fetch('/student/exam_run/', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ student_id: studentId, code: code })
-                    });
-                    const result = await response.json();
-                    document.querySelector('.output').textContent = result.output;
-                } catch (error) {
-                    console.error("Run error:", error);
-                    document.querySelector('.output').textContent = "Run failed! Check console for details.";
-                }
-            }
-
-            async function submitCode() {
-                if (confirm("Are you sure you want to submit? This will end your exam.")) {
-                    const code = editor.getValue();
-                    try {
-                        const response = await fetch('/student/exam_submit/', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ student_id: studentId, code: code })
-                        });
-                        const result = await response.json();
-                        if (result.status === 'success') {
-                            alert("Exam submitted successfully!");
-                            window.location.href = '/';
-                        } else {
-                            alert("Submission failed: " + result.message);
-                        }
-                    } catch (error) {
-                        console.error("Submit error:", error);
-                        alert("Error submitting exam. Check console for details.");
-                    }
-                }
-            }
-
-            document.getElementById('run-btn').addEventListener('click', runCode);
-            document.getElementById('submit-btn').addEventListener('click', submitCode);
-        });
-
-        let timeLeft = JSON.parse('{{ exam_time|escapejs }}') * 60;
-        function updateTimer() {
-            let minutes = Math.floor(timeLeft / 60);
-            let seconds = timeLeft % 60;
-            document.getElementById("timer-display").innerText = `Time: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-            if (timeLeft > 0) {
-                timeLeft--;
-                setTimeout(updateTimer, 1000);
-            } else {
-                alert("Time is up! You will be logged out.");
-                window.location.href = "/";
-            }
-        }
-        updateTimer();
-    </script>
+  <div class="header">
+      <span>Exam Page</span>
+      <span class="timer">Time: 01:59:59</span>
+  </div>
+  <div class="container">
+      <!-- Sol tarafta PDF slaytlarını gösterecek alan -->
+      <div class="instruction">
+          <h3>Exam Instructions</h3>
+          <div class="instruction-content" id="pdf-container" style="overflow-y: auto; max-height: 100%;">
+              <!-- PDF.js ile her sayfa için canvas eklenecek -->
+          </div>
+      </div>
+  
+      <div class="editor" id="editor-container" style="position: relative;">
+          <!-- Monaco editörü için konteyner -->
+          <div id="monaco-editor" style="width: 100%; height: 100%;"></div>
+          <!-- Büyüt/Küçült düğmesi -->
+          <button id="toggle-btn" style="position: absolute; top: 10px; right: 10px; z-index: 1100;">Büyüt</button>
+          <div class="output">Output will be displayed here...</div>
+      </div>
+  </div>
+  
+  <div class="footer">
+      <button>Run</button>
+      <button>Submit</button>
+  </div>
+  
+  <!-- Zamanlayıcı -->
+  <script>
+      document.addEventListener("DOMContentLoaded", function() {
+          let timeLeft = JSON.parse('{{ exam_time|escapejs }}') * 60;
+  
+          function updateTimer() {
+              let minutes = Math.floor(timeLeft / 60);
+              let seconds = timeLeft % 60;
+              document.querySelector(".timer").innerText = Time: ${minutes}:${seconds < 10 ? '0' : ''}${seconds};
+              if (timeLeft > 0) {
+                  timeLeft--;
+                  setTimeout(updateTimer, 1000);
+              }
+          }
+  
+          updateTimer();
+      });
+  </script>
+  
+  <!-- PDF.js Kütüphanesi -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+  <script>
+      var pdfUrl = '{{ pdf_url }}';
+      if (pdfUrl) {
+          var pdfjsLib = window['pdfjs-dist/build/pdf'];
+          pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+          
+          pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
+              var pdfContainer = document.getElementById('pdf-container');
+              // Tüm sayfaları render et
+              for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                  pdf.getPage(pageNum).then(function(page) {
+                      var scale = 1.5;
+                      var viewport = page.getViewport({ scale: scale });
+                      var canvas = document.createElement('canvas');
+                      canvas.style.width = '100%';
+                      canvas.style.marginBottom = '10px';
+                      var context = canvas.getContext('2d');
+                      canvas.height = viewport.height;
+                      canvas.width = viewport.width;
+                      var renderContext = {
+                          canvasContext: context,
+                          viewport: viewport
+                      };
+                      page.render(renderContext);
+                      pdfContainer.appendChild(canvas);
+                  });
+              }
+          }).catch(function(error) {
+              console.error('PDF yüklenirken hata oluştu: ' + error);
+          });
+      } else {
+          console.error("PDF URL bulunamadı.");
+      }
+  </script>
+  
+  <!-- Monaco Editor CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs/loader.js"></script>
+  <script>
+      require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+          // exam_type değerini kullanarak dil belirliyoruz.
+          var langMap = {
+              'py': 'python',
+              'java': 'java',
+              'c': 'c'
+          };
+          var editorLanguage = langMap['{{ exam_type }}'] || 'plaintext';
+  
+          var editor = monaco.editor.create(document.getElementById('monaco-editor'), {
+              value: {{ assignment_content|escapejs }},
+              language: editorLanguage
+          });
+  
+          // Toggle butonu için orijinal stil bilgilerini saklayalım
+          var toggleBtn = document.getElementById('toggle-btn');
+          var editorContainer = document.getElementById('editor-container');
+          var isFullscreen = false;
+  
+          // Orijinal stil ayarlarını saklayalım
+          var originalStyle = {
+              position: editorContainer.style.position || '',
+              top: editorContainer.style.top || '',
+              left: editorContainer.style.left || '',
+              width: editorContainer.style.width || '',
+              height: editorContainer.style.height || ''
+          };
+  
+          toggleBtn.addEventListener('click', function() {
+              if (!isFullscreen) {
+                  editorContainer.classList.add('editor-fullscreen');
+                  toggleBtn.textContent = 'Küçült';
+              } else {
+                  editorContainer.classList.remove('editor-fullscreen');
+                  // Orijinal stil bilgilerini geri yükle
+                  editorContainer.style.position = originalStyle.position;
+                  editorContainer.style.top = originalStyle.top;
+                  editorContainer.style.left = originalStyle.left;
+                  editorContainer.style.width = originalStyle.width;
+                  editorContainer.style.height = originalStyle.height;
+                  toggleBtn.textContent = 'Büyüt';
+              }
+              isFullscreen = !isFullscreen;
+              editor.layout();
+          });
+      });
+  </script>
 </body>
 </html>
-
