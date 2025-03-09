@@ -1,52 +1,191 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="/static/student/exam_page.css">
-    <title>Exam Page</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="/static/student/exam_page.css">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>Exam Page</title>
+  <style>
+    /* Şık geçiş efektiyle tam ekran modunda editör */
+    .editor-fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100% !important;
+      height: 100% !important;
+      z-index: 1000;
+      background: white;
+      transition: all 0.3s ease;
+    }
+  </style>
 </head>
 <body>
-    <div class="header">
-        <span>Exam Page</span>
-        <span class="timer">Time: 01:59:59</span>
-    </div>
-    <div class="container">
-        <!-- Sol tarafta PDF talimatlarını gösterecek alan -->
-        <div class="instruction">
-            <h3>Exam Instructions</h3>
-            <div class="instruction-content">
-                <p>{{ pdf_text|linebreaks }}</p>
-            </div>
-        </div>
-    
-        <div class="editor">
-            <textarea class="code-area" placeholder="Write your code here..."></textarea>
-            <div class="output">Output will be displayed here...</div>
-        </div>
-    </div>
+  <div class="header">
+      <span>Exam Page</span>
+      <span id= "timer">01:59:59</span>
+
+  </div>
+  <div class="container">
+      <!-- Sol tarafta PDF slaytlarını gösterecek alan -->
+      <div class="instruction">
+          <h3>Exam Instructions</h3>
+          <div class="instruction-content" id="pdf-container" style="overflow-y: auto; max-height: 100%;">
+              <!-- PDF.js ile her sayfa için canvas eklenecek -->
+          </div>
+      </div>
+  
+      <div class="editor" id="editor-container" style="position: relative;">
+          <!-- Monaco editörü için konteyner -->
+          <div id="monaco-editor" style="width: 100%; height: 100%;"></div>
+          <!-- Büyüt/Küçült düğmesi -->
+          <button id="toggle-btn" style="position: absolute; top: 10px; right: 10px; z-index: 1100;">Büyüt</button>
+          <div class="output">Output will be displayed here...</div>
+      </div>
+  </div>
+  
+  <div class="footer">
+      <button id="runButton" onclick="saveCode()">Run</button>
+      <button>Submit</button>
+  </div>
+  
+  <!-- Zamanlayıcı -->
+  <script>
+      document.addEventListener("DOMContentLoaded", function() {
+          let timeLeft = JSON.parse('{{ exam_time|escapejs }}') * 60;
+  
+          function updateTimer() {
+              let minutes = Math.floor(timeLeft / 60);
+              let seconds = timeLeft % 60;
+              document.querySelector(".timer").innerText = `Time: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+              if (timeLeft > 0) {
+                  timeLeft--;
+                  setTimeout(updateTimer, 1000);
+              }
+          }
+  
+          updateTimer();
+      });
+  </script>
+  
+  <!-- PDF.js Kütüphanesi -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+  <script>
+      var pdfUrl = '{{ pdf_url }}';
+      if (pdfUrl) {
+          var pdfjsLib = window['pdfjs-dist/build/pdf'];
+          pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+          
+          pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
+              var pdfContainer = document.getElementById('pdf-container');
+              // Tüm sayfaları render et
+              for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                  pdf.getPage(pageNum).then(function(page) {
+                      var scale = 1.5;
+                      var viewport = page.getViewport({ scale: scale });
+                      var canvas = document.createElement('canvas');
+                      canvas.style.width = '100%';
+                      canvas.style.marginBottom = '10px';
+                      var context = canvas.getContext('2d');
+                      canvas.height = viewport.height;
+                      canvas.width = viewport.width;
+                      var renderContext = {
+                          canvasContext: context,
+                          viewport: viewport
+                      };
+                      page.render(renderContext);
+                      pdfContainer.appendChild(canvas);
+                  });
+              }
+          }).catch(function(error) {
+              console.error('PDF yüklenirken hata oluştu: ' + error);
+          });
+      } else {
+          console.error("PDF URL bulunamadı.");
+      }
+  </script>
+  
+  <!-- Monaco Editor CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs/loader.js"></script>
+  <script>
+      require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs' }});
+
+      var editor;
+
+      require(['vs/editor/editor.main'], function() { // exam_type değerini kullanarak dil belirliyoruz.
+          var langMap = {
+              'py': 'python',
+              'java': 'java',
+              'c': 'c'
+          };
+          var editorLanguage = langMap['{{ exam_type }}'] || 'plaintext';
+  
+          editor = monaco.editor.create(document.getElementById('monaco-editor'), {
+              value: `{{ assignment_content|escapejs }}`,
+              language: editorLanguage
+          });
+  
+          // Toggle butonu için orijinal stil bilgilerini saklayalım
+          var toggleBtn = document.getElementById('toggle-btn');
+          var editorContainer = document.getElementById('editor-container');
+          var isFullscreen = false;
+  
+          // Orijinal stil ayarlarını saklayalım
+          var originalStyle = {
+              position: editorContainer.style.position || '',
+              top: editorContainer.style.top || '',
+              left: editorContainer.style.left || '',
+              width: editorContainer.style.width || '',
+              height: editorContainer.style.height || ''
+          };
+  
+          toggleBtn.addEventListener('click', function() {
+              if (!isFullscreen) {
+                  editorContainer.classList.add('editor-fullscreen');
+                  toggleBtn.textContent = 'Küçült';
+              } else {
+                  editorContainer.classList.remove('editor-fullscreen');
+                  // Orijinal stil bilgilerini geri yükle
+                  editorContainer.style.position = originalStyle.position;
+                  editorContainer.style.top = originalStyle.top;
+                  editorContainer.style.left = originalStyle.left;
+                  editorContainer.style.width = originalStyle.width;
+                  editorContainer.style.height = originalStyle.height;
+                  toggleBtn.textContent = 'Büyüt';
+              }
+              isFullscreen = !isFullscreen;
+              editor.layout();
+          });
+      });
+
+      function saveCode() {
+        const code = editor.getValue();
+        let student_id = localStorage.getItem("student_id"); 
+        let student_name = localStorage.getItem("student_name"); 
+
+        console.log("student_id:", student_id);
+        console.log("student_name:", student_name);
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        fetch("/save_code/", {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken
+            },
+            body: JSON.stringify({
+                student_id: student_id, 
+                student_name: student_name, 
+                code: code })
+        })
+        .then(response => response.json())
+        .then(data => console.log(data))
+        .catch(error => console.error("Kod kaydedilirken hata oluştu:", error));
+    }   
     
 
-    <div class="footer">
-        <button>Run</button>
-        <button>Submit</button>
-    </div>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            let timeLeft = JSON.parse('{{ exam_time|escapejs }}') * 60;  // Güvenli JSON dönüşümü
-    
-            function updateTimer() {
-                let minutes = Math.floor(timeLeft / 60);
-                let seconds = timeLeft % 60;
-                document.querySelector(".timer").innerText = `Time: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-                if (timeLeft > 0) {
-                    timeLeft--;
-                    setTimeout(updateTimer, 1000);
-                }
-            }
-    
-            updateTimer();
-        });
-    </script>
+
+  </script>
 </body>
 </html>

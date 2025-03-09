@@ -48,11 +48,17 @@
                     });
         
                     const result = await response.json(); // JSON yanıtı alınır ve result değişkenine atanır
+                    console.log("Result:", result); 
                     const responseMessage = document.getElementById('response-message'); 
-        
+                    console.log("responseMessage:", responseMessage); 
                     if (result.status === 'success') { 
                         responseMessage.style.display = 'none'; 
-                        window.location.href = result.redirect_url;  
+                        localStorage.setItem("student_id", result.student_id);
+                        localStorage.setItem("student_name", result.student_name);
+                        console.log("Student ID:", result.student_id);
+                        console.log("Student name:", result.student_name);
+
+                        window.location.href = result.redirect_url;
                     } else { 
                         responseMessage.style.display = 'block'; 
                         responseMessage.textContent = result.message; 

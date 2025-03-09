@@ -6,8 +6,6 @@ from django.conf import settings
 import csv
 import shutil
 
-
-import docker
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -131,8 +129,10 @@ def handle_docker_operations(config_path, request):
         # CSV dosyasının olduğu klasör
         csv_dir = "media/student_list"
         csv_files = os.listdir(csv_dir)
+
         if not csv_files:
             return JsonResponse({"error": "No CSV file found in student_list folder"}, status=400)
+        
         csv_file_path = os.path.join(csv_dir, csv_files[0])
 
         # script dosyasının olduğu klasör
@@ -140,6 +140,7 @@ def handle_docker_operations(config_path, request):
         script_files = os.listdir(script_dir)
         if not script_files:
             return JsonResponse({"error": "No assignment file found in assignment_file folder"}, status=400)
+        
         script_file_path = os.path.join(script_dir, script_files[0])
 
         # "uploads" klasörü yoksa oluştur
@@ -153,7 +154,8 @@ def handle_docker_operations(config_path, request):
             for row in reader:
                 if len(row) >= 2:
                     student_id = row[0]
-                    student_name = row[1].strip().lower()
+                    student_name = row[1].strip().lower().replace(" ", "-")
+                    container_name = f"{student_id}-{student_name}-container"
                     folder_name = f"{student_id}_{student_name}"
                     students.append(folder_name)
 
@@ -169,11 +171,12 @@ def handle_docker_operations(config_path, request):
             if exam_type == "py":
                 cmd_line = f'CMD ["/bin/sh", "-c", "python {file_name}.py"]\n'
             elif exam_type == "java":
-                cmd_line = f'CMD ["/bin/sh", "-c", "javac /uploads/{student}/{file_name}.java && java -cp /uploads/{student} {file_name}"]\n'
+                cmd_line = f'CMD ["/bin/sh", "-c", "javac {file_name}.java && java -cp . {file_name}"]\n'
             elif exam_type == "c":
-                cmd_line = f'CMD ["/bin/sh", "-c", "gcc -o \"/uploads/{student}/{file_name}\" \"/uploads/{student}/{file_name}.c\" && \"/uploads/{student}/{file_name}\""]\n'
+                cmd_line = f'CMD ["/bin/sh", "-c", "gcc -o {file_name} {file_name}.c && ./{file_name}"]\n'
             else:
                 return JsonResponse({"error": f"Unsupported file type: {exam_type}"}, status=400)
+
 
             # Son satırı özel CMD ile değiştir
             dockerfile_lines[-1] = cmd_line
@@ -192,7 +195,8 @@ def handle_docker_operations(config_path, request):
         # Docker container'ları çalıştır
         for student in students:
             safe_student_name = student.replace("_", "-")
-            os.system(f"docker run {safe_student_name}")
+            os.system(f"docker run --name {safe_student_name}-container {safe_student_name}")
+
 
         return JsonResponse({"message": "Docker işlemleri başarıyla tamamlandı!"})
     
