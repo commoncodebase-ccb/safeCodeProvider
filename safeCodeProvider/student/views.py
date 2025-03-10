@@ -98,10 +98,6 @@ def exam_page(request):
         'assignment_content': assignment_content,
     })
 
-from django.http import JsonResponse
-import os
-import json
-
 def save_code(request):
     try:
         # JSON verisini al
@@ -120,18 +116,18 @@ def save_code(request):
         file_name = config.get("file_name", "script").lower()
         exam_type = config.get("type", "py").lower()
         file_name += f".{exam_type}"
-        
+
         # Öğrencinin dosya yolu
         folder_name = f"{student_id}_{student_name}"
         print("folder_name:", folder_name)
-        student_folder = os.path.join(UPLOADS_DIR, folder_name)
+        student_folder = os.path.join(UPLOADS_DIR, folder_name)#uploads/220717005_emre
         print("student_folder:", student_folder)
 
         if not os.path.exists(student_folder):
             return JsonResponse({'status': 'error', 'message': 'Student folder not found'})
         
         # Öğrencinin kod dosyası yolunu oluştur
-        code_file_path = os.path.join(student_folder, file_name)
+        code_file_path = os.path.join(student_folder, file_name)#uploads/220717005_emre/main.py
         print("code_file_path:", code_file_path)
 
         # Kod dosyasını yaz
@@ -142,3 +138,50 @@ def save_code(request):
 
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
+
+def run_code(request):
+    try:
+        data = json.loads(request.body)
+        student_id = data.get("student_id")
+        student_name = data.get("student_name")
+
+        if not student_id or not student_name:
+            return JsonResponse({"status": "error", "message": "Incomplete information was sent."})
+
+        container_name = f"{student_id}-{student_name}-container" #220717005-emre-container
+        image_name = f"{student_id}-{student_name}" #220717005-emre
+
+        config_path = "config.json"
+
+        with open(config_path, "r", encoding="utf-8") as file:
+            config = json.load(file)
+
+        file_name = config.get("file_name", "script").lower()#main
+        exam_type = config.get("type", "py").lower()#py
+        file_name += f".{exam_type}"  #main.py
+
+        folder_name = f"{student_id}_{student_name}"  #220717005_emre
+        student_folder = os.path.abspath(os.path.join(UPLOADS_DIR, folder_name))
+
+
+        # Mevcut container'ı kontrol et
+        check_status_command = f"docker ps -a -f name={container_name} --format '{{{{.State}}}}'"
+        container_status = os.popen(check_status_command).read().strip()
+        print("container_status:", container_status)
+
+        # Eski container varsa kaldır
+        if container_status:
+            os.system(f"docker rm -f {container_name}")
+            print("container is removed")
+
+        os.system(f"docker build -t {image_name} {student_folder}")
+
+        # Yeni container oluştur ve kodu çalıştıru
+        run_command = f"docker run --rm --name {container_name} -v {student_folder}:/app/uploads {image_name} python3 /app/uploads/{file_name}"
+        
+        terminal_output = os.popen(run_command).read().strip()
+        
+        return JsonResponse({"status": "success", "output": terminal_output})
+
+    except json.JSONDecodeError:
+        return JsonResponse({"status": "error", "message": "Geçersiz JSON formatı."})
