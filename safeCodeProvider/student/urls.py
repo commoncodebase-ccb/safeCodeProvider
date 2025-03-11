@@ -9,5 +9,6 @@ urlpatterns = [
     path('control/', views.student_control, name='student_control'),  # Öğrenci giriş kontrolünü sağlayan API URL'si
     path('save_code/', views.save_code, name='save_code'),
     path('run_code/', views.run_code, name='run_code'),
+    path('delete_docker/', views.delete_docker, name='delete_docker'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
