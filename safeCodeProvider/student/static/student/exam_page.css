@@ -59,9 +59,11 @@ body {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    background-color: white;
     border: 1px solid #ddd;
     border-radius: 5px;
+    height: 500px;
+    background-color: #052756;
+    
 }
 
 .code-area {
@@ -102,4 +104,8 @@ button {
 
 button:hover {
     background-color: #052756;
+}
+
+#rusure{
+    display:none;
 }

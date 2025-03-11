@@ -25,31 +25,40 @@
       <span>Exam Page</span>
       <span id= "timer">01:59:59</span>
 
-  </div>
+  </div> 
   <div class="container">
       <!-- Sol tarafta PDF slaytlarını gösterecek alan -->
-      <div class="instruction">
+      <div class="instruction" style="width:%30">
           <h3>Exam Instructions</h3>
           <div class="instruction-content" id="pdf-container" style="overflow-y: auto; max-height: 100%;">
               <!-- PDF.js ile her sayfa için canvas eklenecek -->
           </div>
       </div>
-  
-      <div class="editor" id="editor-container" style="position: relative;">
-          <!-- Monaco editörü için konteyner -->
-          <div id="monaco-editor" style="width: 100%; height: 100%;"></div>
-          <!-- Büyüt/Küçült düğmesi -->
-          <button id="toggle-btn" style="position: absolute; top: 10px; right: 10px; z-index: 1100;">Büyüt</button>
-          <div id="output">Output will be displayed here...</div>
-
+      <div style="display:flex; flex-direction:column; width:1000px">
+            <div class="editor" id="editor-container" style="position: relative;">
+                <!-- Monaco editörü için konteyner -->
+                <div id="monaco-editor" style="width: 100%; height: 100%;"></div>
+                <!-- Büyüt/Küçült düğmesi -->
+                <button id="toggle-btn" style="position: absolute; top: 10px; right: 10px; z-index: 1100;">Büyüt</button>
+            </div>
+            <div id="output"style="padding:30px;height:300px">Output will be displayed here...</div>
       </div>
+
   </div>
   
   <div class="footer">
       <button id="runButton" onclick="saveCode()">Run</button>
-      <button>Submit</button>
+      <button id="submitButton" onclick="RUSure()">Submit</button>
+  </div>
+
+  <div id="rusure">
+    <h2>Are You sure to submit?</h2>
+      <button id="rusyesbutton" onclick="submitCode()">YES</button>
+      <button id="rusnobutton" onclick="RUSurno()">NO</button>
   </div>
   
+  
+
   <!-- Zamanlayıcı -->
   <script>
       document.addEventListener("DOMContentLoaded", function() {
@@ -123,7 +132,10 @@
   
           editor = monaco.editor.create(document.getElementById('monaco-editor'), {
               value: `{{ assignment_content|escapejs }}`,
-              language: editorLanguage
+              language: editorLanguage,
+              theme: "vs-dark"  // Koyu tema eklendi
+
+
           });
   
           // Toggle butonu için orijinal stil bilgilerini saklayalım
@@ -230,6 +242,70 @@
             document.getElementById("output").innerText = "Sunucu hatası!";
         });
     }
+
+    function submitCode() {
+        const code = editor.getValue();
+        let student_id = localStorage.getItem("student_id"); 
+        let student_name = localStorage.getItem("student_name"); 
+
+        console.log("student_id:", student_id);
+        console.log("student_name:", student_name);
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        fetch("/save_code/", {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken
+            },
+            body: JSON.stringify({
+                student_id: student_id, 
+                student_name: student_name, 
+                code: code })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            if (data.status === "success") {
+                deleteDocker(student_id,student_name)
+            }
+        })
+        .catch(error => console.error("Kod kaydedilirken hata oluştu:", error));
+    }
+
+    function deleteDocker(student_id,student_name) { 
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        fetch("/delete_docker/", {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken
+            },
+            body: JSON.stringify({
+                student_id: student_id, 
+                student_name: student_name})
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            if (data.status === "success") {
+                alert("game over.")
+            }
+        })
+        .catch(error => console.error("Kod kaydedilirken hata oluştu:", error));
+    }
+
+    function RUSure(){
+        document.getElementById("rusure").style.display = "block";
+    }
+
+    function RUSurno() {
+        document.getElementById("rusure").style.display = "none";
+    }
+
 
   </script>
 </body>

@@ -185,3 +185,31 @@ def run_code(request):
 
     except json.JSONDecodeError:
         return JsonResponse({"status": "error", "message": "Geçersiz JSON formatı."})
+
+
+def delete_docker(request):
+    try:
+        # JSON verisini al
+        body = json.loads(request.body)
+
+        # JSON verisini kullanarak bilgileri al
+        student_id = body.get('student_id')
+        student_name = body.get('student_name').lower()
+
+        # Docker container ve image isimlerini oluştur
+        container_name = f"{student_id}-{student_name}-container"
+        image_name = f"{student_id}-{student_name}"
+
+        # Önce container'ı durdur ve sil
+        stop_container_command = f"docker stop {container_name} && docker rm {container_name}"
+        delete_image_command = f"docker rmi -f {image_name}"
+
+        print(f"Stopping and removing container: {container_name}")
+        os.system(stop_container_command)  # Container'ı durdur ve sil
+        print(f"Removing image: {image_name}")
+        os.system(delete_image_command)  # Image'ı sil
+
+        return JsonResponse({'status': 'success', 'message': 'Docker container and image deleted successfully!'})
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
