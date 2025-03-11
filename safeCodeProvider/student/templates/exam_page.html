@@ -7,109 +7,147 @@
   <meta name="csrf-token" content="{{ csrf_token }}">
   <title>Exam Page</title>
   <style>
-    /* Şık geçiş efektiyle tam ekran modunda editör */
-    .editor-fullscreen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100% !important;
-      height: 100% !important;
-      z-index: 1000;
-      background: white;
-      transition: all 0.3s ease;
-    }
-    .container {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-    gap: 10px;
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-/* Sol taraf (PDF alanı) */
-.instruction {
-    flex: 1; /* 1 oranında yer kaplayacak */
-    background: #f4f4f4;
-    padding: 20px;
-    overflow-y: auto;
-    border-right: 2px solid #ddd;
-}
-
-/* Sağ taraf (Editör ve çıktı alanı) */
-.right-panel {
-    flex: 2; /* 2 oranında yer kaplayacak */
+body {
+    font-family: Unbounded, serif;
+    height: 100vh;
     display: flex;
     flex-direction: column;
-    gap: 10px;
 }
 
-/* Editör */
-.editor {
-    border: 1px solid #ccc;
+.navbar {
+    width: 100%;
+    background-color: #181d24;
+    color: white;
+    text-align: center;
+    padding: 15px 0;
 }
 
-/* Çıktı Alanı */
-#output {
-    height: 200px;
-    background: #222;
-    color: #fff;
-    padding: 15px;
+.container {
+    display: flex;
+    width: 100%;
+    flex: 1;
+}
+
+.instruction {
+    width: 33%;
+    background-color: #f8f8f8;
+    padding: 20px;
     overflow-y: auto;
 }
 
-/* Butonlar */
+.instruction-content {
+    padding: 10px;
+    height: calc(100% - 40px);
+}
+
+.right-panel {
+    width: 67%;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.editor {
+    flex: 2;
+    position: relative;
+    background-color: #1e1e1e;
+    color: white;
+}
+
+#monaco-editor {
+    width: 100%;
+    height: 100%;
+}
+
+#toggle-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+}
+
+#output {
+    flex: 1;
+    background-color: #1e1e1e;
+    color: white;
+    padding: 15px;
+    margin-top: 10px;
+}
+
 .buttons {
     display: flex;
-    justify-content: center;
-    gap: 10px;
+    justify-content: space-between;
+    margin-top: 10px;
 }
 
-.buttons button {
-    padding: 10px 20px;
+button {
+    padding: 10px 15px;
     border: none;
-    background: #007bff;
+    background-color:#ff4d00;
     color: white;
     cursor: pointer;
+    padding: 12px;
+    width: 120px;
+    font-size: 14px;
 }
 
-.buttons button:hover {
-    background: #0056b3;
+button:hover {
+    background-color: #a83200;
 }
+
+footer {
+    width: 100%;
+    text-align: center;
+    background-color: #181d24;
+    color: white;
+    padding: 10px 0;
+}
+
 
   </style>
 </head>
+
 <body>
     <div class="navbar">
-        <h2 style="text-align: center; font-family: Unbounded, serif;">Safe Code Provider | Exam Panel <span style="margin:0 0 auto" id= "timer">01:59:59</span></h2>
-        
+        <h2>Safe Code Provider | Exam Panel <span id="timer">01:59:59</span></h2>
+    </div>
+
+    <div class="container">
+        <!-- Sol tarafta PDF slaytlarını gösterecek alan -->
+        <div class="instruction">
+            <h3>Exam Instructions</h3>
+            <div style="margin-top: 10px;" class="instruction-content" id="pdf-container">
+                <!-- PDF.js ile her sayfa için canvas eklenecek -->
+            </div>
         </div>
 
-  <div class="container">
-      <!-- Sol tarafta PDF slaytlarını gösterecek alan -->
-      <div class="instruction" >
-          <h3>Exam Instructions</h3>
-          <div class="instruction-content" id="pdf-container" >
-              <!-- PDF.js ile her sayfa için canvas eklenecek -->
-          </div>
-      </div>
         <!-- Sağ tarafta kod editörü ve çıktı alanı -->
-      <div class="right-panel" >
-            <div class="editor" id="editor-container" >
-                <!-- Monaco editörü için konteyner -->
-                <div id="monaco-editor" style="width: 100%; height: 100%;"></div>
-                <!-- Büyüt/Küçült düğmesi -->
-                <button id="toggle-btn" style="position: absolute; top: 10px; right: 10px; z-index: 1100;">Büyüt</button>
+        <div class="right-panel">
+            <div class="editor" id="editor-container">
+                <div id="monaco-editor"></div>
+                <button id="toggle-btn">Büyüt</button>
             </div>
-            <div id="output"style="padding:30px;height:200px">Output will be displayed here...</div>
+
+            <div id="output">Output will be displayed here...</div>
 
             <div class="buttons">
                 <button id="runButton" onclick="saveCode()">Run</button>
                 <button id="submitButton" onclick="RUSure()">Submit</button>
             </div>
-      </div>
-      
-  </div>
+        </div>
+    </div>
 
-  
+    <footer>
+        <p>CommonCodeBase</p>
+    </footer>  
+
 
 
   <div id="rusure">
@@ -117,9 +155,6 @@
       <button id="rusyesbutton" onclick="submitCode()">YES</button>
       <button id="rusnobutton" onclick="RUSurno()">NO</button>
   </div>
-  <footer style="font-family: Unbounded, serif;">
-    <p style="font-family: Unbounded, serif;">CommonCodeBase</p>
-</footer>
 
   <!-- Zamanlayıcı -->
   <script>
@@ -180,58 +215,56 @@
   <!-- Monaco Editor CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs/loader.js"></script>
   <script>
-      require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs' }});
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs' }});
 
-      var editor;
+var editor;
+var isFullscreen = false;
 
-      require(['vs/editor/editor.main'], function() { // exam_type değerini kullanarak dil belirliyoruz.
-          var langMap = {
-              'py': 'python',
-              'java': 'java',
-              'c': 'c'
-          };
-          var editorLanguage = langMap['{{ exam_type }}'] || 'plaintext';
-  
-          editor = monaco.editor.create(document.getElementById('monaco-editor'), {
-              value: `{{ assignment_content|escapejs }}`,
-              language: editorLanguage,
-              theme: "vs-dark"  // Koyu tema eklendi
+require(['vs/editor/editor.main'], function() {
+    var langMap = {
+        'py': 'python',
+        'java': 'java',
+        'c': 'c'
+    };
+    var editorLanguage = langMap['{{ exam_type }}'] || 'plaintext';
 
+    var editorContainer = document.getElementById('editor-container');
+    var toggleBtn = document.getElementById('toggle-btn');
 
-          });
-  
-          // Toggle butonu için orijinal stil bilgilerini saklayalım
-          var toggleBtn = document.getElementById('toggle-btn');
-          var editorContainer = document.getElementById('editor-container');
-          var isFullscreen = false;
-  
-          // Orijinal stil ayarlarını saklayalım
-          var originalStyle = {
-              position: editorContainer.style.position || '',
-              top: editorContainer.style.top || '',
-              left: editorContainer.style.left || '',
-              width: editorContainer.style.width || '',
-              height: editorContainer.style.height || ''
-          };
-  
-          toggleBtn.addEventListener('click', function() {
-              if (!isFullscreen) {
-                  editorContainer.classList.add('editor-fullscreen');
-                  toggleBtn.textContent = 'Küçült';
-              } else {
-                  editorContainer.classList.remove('editor-fullscreen');
-                  // Orijinal stil bilgilerini geri yükle
-                  editorContainer.style.position = originalStyle.position;
-                  editorContainer.style.top = originalStyle.top;
-                  editorContainer.style.left = originalStyle.left;
-                  editorContainer.style.width = originalStyle.width;
-                  editorContainer.style.height = originalStyle.height;
-                  toggleBtn.textContent = 'Büyüt';
-              }
-              isFullscreen = !isFullscreen;
-              editor.layout();
-          });
-      });
+    // Sayfa açıldığında editör geniş başlayacak
+    editorContainer.style.width = "100%";
+    editorContainer.style.height = "500px"; // Büyük başlangıç boyutu
+
+    editor = monaco.editor.create(document.getElementById('monaco-editor'), {
+        value: `{{ assignment_content|escapejs }}`,
+        language: editorLanguage,
+        theme: "vs-dark"
+    });
+
+    toggleBtn.addEventListener('click', function() {
+        if (!isFullscreen) {
+            // Tam ekran modu
+            editorContainer.style.position = "fixed";
+            editorContainer.style.top = "0";
+            editorContainer.style.left = "0";
+            editorContainer.style.width = "100vw";
+            editorContainer.style.height = "100vh";
+            editorContainer.style.zIndex = "9999";
+            toggleBtn.textContent = "Küçült";
+        } else {
+            // Başlangıçtaki geniş moda geri dön
+            editorContainer.style.position = "";
+            editorContainer.style.top = "";
+            editorContainer.style.left = "";
+            editorContainer.style.width = "100%";
+            editorContainer.style.height = "500px";
+            editorContainer.style.zIndex = "";
+            toggleBtn.textContent = "Büyüt";
+        }
+        isFullscreen = !isFullscreen;
+        editor.layout();
+    });
+});
 
       function saveCode() {
         const code = editor.getValue();

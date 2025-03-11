@@ -1,7 +1,7 @@
 
   @font-face {
     font-family: "Chakra Petch";
-    src: url('../../../fonts/ChakraPetch-Regular.ttf') format("truetype");;
+    src: url('../../../static/fonts/ChakraPetch-Regular.ttf') format("truetype");;
 }
 @font-face {
     font-family: "Lexend Deca";
