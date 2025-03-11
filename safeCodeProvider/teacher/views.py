@@ -10,6 +10,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
+UPLOADS_DIR = "uploads"
+
 CONFIG_FILE = os.path.join(settings.BASE_DIR, 'config.json')
 
 ALLOWED_EXTENSIONS = {
@@ -244,3 +246,41 @@ def submits_page(request):
                     students.append({"id": row[0], "name": row[1]})
 
     return render(request, "submits_page.html", {"exam_password": exam_password, "students": students})
+
+def bring_code(request):
+    try:
+        body = json.loads(request.body)
+
+        student_id = body.get("student_id")
+        student_name = body.get('student_name').lower()
+
+        with open(CONFIG_FILE, "r", encoding="utf-8") as file:
+            config = json.load(file)
+
+        file_name = config.get("file_name", "script").lower()
+        exam_type = config.get("type", "py").lower()
+        file_name += f".{exam_type}"
+
+        folder_name = f"{student_id}_{student_name}"
+        student_folder = os.path.join(UPLOADS_DIR, folder_name)#uploads/220717005_emre
+
+        if not os.path.exists(student_folder):
+            return JsonResponse({'status': 'error', 'message': 'Student folder not found'})
+        
+        # Öğrencinin kod dosyası yolunu oluştur
+        code_file_path = os.path.join(student_folder, file_name)
+
+        if not os.path.exists(code_file_path):
+            return JsonResponse({'status': 'error', 'message': 'Code file not found'})
+        
+        with open(code_file_path, "r", encoding="utf-8") as file:
+            code_content = file.read()
+
+        return JsonResponse({
+            "success": True,
+            "content": code_content,
+            "exam_type": exam_type
+        })
+    except Exception as e:
+        return JsonResponse({"error": f"kod dondurulurken bir hata olustu: {str(e)}"})
+    

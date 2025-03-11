@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch&family=Lexend+Deca:wght@300&family=Nova+Square&family=Unbounded&display=swap" rel="stylesheet">  
 
-    <title>Sbumnits Page</title>
+    <title>Submits Page</title>
     <style>
 
 *{
@@ -85,7 +86,7 @@
     </div>
 
     <h2 style="color: #181d24 ;text-align: center; margin-top: 20px;">You can share this url with your students. They will see the exam page at this url:</h2>
-    <h2 style="color: #ff4d00;text-align: center;">http://127.0.0.1:8000/student/exam</h2>
+    <h2 style="color: #ff4d00;text-align: center;">http://127.0.0.1:8001/student/exam</h2>
 
 <div class="container" style="color: #181d24" >
     <div class="left-container">
@@ -93,7 +94,7 @@
         <div class="student-container">
             {% for student in students %}
                 <div class="student-card">
-                    <a href="javascript:void(0);" onclick="alert('Clicked: {{ student.name }}')">
+                    <a href="javascript:void(0);" onclick="bringCode('{{ student.id }}', '{{ student.name }}')">
                         <strong>ID:</strong> {{ student.id }} - <strong>Name:</strong> {{ student.name }}
                     </a>
                 </div>
@@ -104,11 +105,9 @@
 
     <div class="right-container">
         <h2 style="margin-top: 20px;">Exam Password: {{ exam_password }}</h1>
-            <div class="editor" id="editor-container" >
+            <div class="editor" id="editor-container" style= "height: 700px">
                 <!-- Monaco editörü için konteyner -->
                 <div id="monaco-editor" style="width: 100%; height: 100%;"></div>
-                <!-- Büyüt/Küçült düğmesi -->
-                <button id="toggle-btn" style="position: absolute; top: 10px; right: 10px; z-index: 1100;">Büyüt</button>
             </div>
     </div>
 </div>
@@ -134,43 +133,52 @@
           editor = monaco.editor.create(document.getElementById('monaco-editor'), {
               value: `{{ assignment_content|escapejs }}`,
               language: editorLanguage,
-              theme: "vs-dark"  // Koyu tema eklendi
-
+              theme: "vs-dark", // Koyu tema eklendi
+              fontSize: 18
 
           });
   
           // Toggle butonu için orijinal stil bilgilerini saklayalım
-          var toggleBtn = document.getElementById('toggle-btn');
           var editorContainer = document.getElementById('editor-container');
-          var isFullscreen = false;
+          
   
-          // Orijinal stil ayarlarını saklayalım
-          var originalStyle = {
-              position: editorContainer.style.position || '',
-              top: editorContainer.style.top || '',
-              left: editorContainer.style.left || '',
-              width: editorContainer.style.width || '',
-              height: editorContainer.style.height || ''
-          };
-  
-          toggleBtn.addEventListener('click', function() {
-              if (!isFullscreen) {
-                  editorContainer.classList.add('editor-fullscreen');
-                  toggleBtn.textContent = 'Küçült';
-              } else {
-                  editorContainer.classList.remove('editor-fullscreen');
-                  // Orijinal stil bilgilerini geri yükle
-                  editorContainer.style.position = originalStyle.position;
-                  editorContainer.style.top = originalStyle.top;
-                  editorContainer.style.left = originalStyle.left;
-                  editorContainer.style.width = originalStyle.width;
-                  editorContainer.style.height = originalStyle.height;
-                  toggleBtn.textContent = 'Büyüt';
-              }
-              isFullscreen = !isFullscreen;
-              editor.layout();
-          });
       });
+
+      function bringCode(studentId, studentName) {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        fetch("/teacher/bring_code/",{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                student_id: studentId,
+                student_name: studentName})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                var langMap = {
+                    'py': 'python',
+                    'java': 'java',
+                    'c': 'c'
+                };
+                var editorLanguage = langMap[data.exam_type] || 'plaintext';
+
+                // Monaco Editor içeriğini güncelle
+                if (editor) {
+                    editor.setValue(data.content);
+                    monaco.editor.setModelLanguage(editor.getModel(), editorLanguage);
+                }
+            } else {
+                alert("Dosya bulunamadı veya okunamadı!");
+            }
+        })
+        .catch(error => console.error("Error fetching student code:", error));
+    }
+
     </script>  
 </html>
 
