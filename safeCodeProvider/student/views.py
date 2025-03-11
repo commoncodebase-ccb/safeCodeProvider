@@ -214,3 +214,13 @@ def delete_docker(request):
 
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
+    
+
+def get_exam_time(request):
+    try:
+        with open("config.json", "r", encoding="utf-8") as file:
+            data = json.load(file)
+            exam_time = int(data.get("exam_time", 30))  # Default 30 dakika
+            return JsonResponse({"exam_time": exam_time})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
