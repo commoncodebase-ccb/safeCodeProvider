@@ -109,6 +109,53 @@ footer {
     color: white;
     padding: 10px 0;
 }
+        /* Arka plan overlay */
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        /* Popup içeriği */
+        #rusure {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            text-align: center;
+            width: 400px;
+        }
+
+        /* Butonlar */
+        #rusure button {
+            margin: 10px;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        #rusyesbutton {
+            background-color: green;
+            color: white;
+        }
+
+        #rusnobutton {
+            background-color: red;
+            color: white;
+        }
 
 
   </style>
@@ -116,7 +163,7 @@ footer {
 
 <body>
     <div class="navbar">
-        <h2>Safe Code Provider | Exam Panel <span id="timer">01:59:59</span></h2>
+        <h2>Safe Code Provider | Exam Panel <span style="color: #ff4d00; margin-left: 30px;" id="timer">01:59:59</span></h2>
     </div>
 
     <div class="container">
@@ -149,8 +196,10 @@ footer {
     </footer>  
 
 
+    <!-- Arka plan overlay -->
+    <div id="overlay" onclick="RUSurno()"></div>
 
-  <div id="rusure">
+  <div id="rusure" style="display: none;">
     <h2>Are You sure to submit?</h2>
       <button id="rusyesbutton" onclick="submitCode()">YES</button>
       <button id="rusnobutton" onclick="RUSurno()">NO</button>
@@ -158,21 +207,55 @@ footer {
 
   <!-- Zamanlayıcı -->
   <script>
-      document.addEventListener("DOMContentLoaded", function() {
-          let timeLeft = JSON.parse('{{ exam_time|escapejs }}') * 60;
-  
-          function updateTimer() {
-              let minutes = Math.floor(timeLeft / 60);
-              let seconds = timeLeft % 60;
-              document.querySelector(".timer").innerText = `Time: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-              if (timeLeft > 0) {
-                  timeLeft--;
-                  setTimeout(updateTimer, 1000);
-              }
-          }
-  
-          updateTimer();
-      });
+        async function fetchExamTime() {
+            try {
+                const response = await fetch("/get_exam_time/");
+                const data = await response.json();
+                if (data.exam_time) {
+                    startTimer(data.exam_time * 60);  // Dakika -> Saniyeye çevir
+                }
+            } catch (error) {
+                console.error("Süre alınamadı:", error);
+            }
+        }
+
+        function startTimer(duration) {
+            let timer = duration, hours, minutes, seconds;
+            const timerElement = document.getElementById("timer");
+            const runButton = document.getElementById("runButton");
+            const submitButton = document.getElementById("submitButton");
+
+            function updateTimer() {
+                hours = Math.floor(timer / 3600);
+                minutes = Math.floor((timer % 3600) / 60);
+                seconds = timer % 60;
+
+                timerElement.textContent = 
+                    String(hours).padStart(2, '0') + ":" + 
+                    String(minutes).padStart(2, '0') + ":" + 
+                    String(seconds).padStart(2, '0');
+
+                if (timer > 0) {
+                    timer--;
+                    setTimeout(updateTimer, 1000);
+                } else {
+                    // Süre dolunca butonları devre dışı bırak
+                    runButton.disabled = true;
+                    submitButton.disabled = true;
+
+                    // Butonları gri yapmak için CSS ekle
+                    runButton.style.backgroundColor = "#ccc";
+                    submitButton.style.backgroundColor = "#ccc";
+                    runButton.style.cursor = "not-allowed";
+                    submitButton.style.cursor = "not-allowed";
+                }
+            }
+
+            updateTimer();
+        }
+
+        // Sayfa açıldığında süreyi al ve geri sayımı başlat
+        fetchExamTime(); 
   </script>
   
   <!-- PDF.js Kütüphanesi -->
@@ -393,14 +476,15 @@ require(['vs/editor/editor.main'], function() {
         .catch(error => console.error("Kod kaydedilirken hata oluştu:", error));
     }
 
-    function RUSure(){
-        document.getElementById("rusure").style.display = "block";
-    }
+    function RUSure() {
+            document.getElementById("overlay").style.display = "block";
+            document.getElementById("rusure").style.display = "block";
+        }
 
     function RUSurno() {
+        document.getElementById("overlay").style.display = "none";
         document.getElementById("rusure").style.display = "none";
     }
-
 
   </script>
 </body>
