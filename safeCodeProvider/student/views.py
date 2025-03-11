@@ -167,20 +167,21 @@ def run_code(request):
         # Mevcut container'ı kontrol et
         check_status_command = f"docker ps -a -f name={container_name} --format '{{{{.State}}}}'"
         container_status = os.popen(check_status_command).read().strip()
-        print("container_status:", container_status)
 
         # Eski container varsa kaldır
         if container_status:
             os.system(f"docker rm -f {container_name}")
-            print("container is removed")
 
         os.system(f"docker build -t {image_name} {student_folder}")
 
         # Yeni container oluştur ve kodu çalıştıru
-        run_command = f"docker run --rm --name {container_name} -v {student_folder}:/app/uploads {image_name} python3 /app/uploads/{file_name}"
+        run_command = f"docker run --rm --name {container_name} -v {student_folder}:/app/uploads {image_name} python3 /app/uploads/{file_name} 2>&1"
         
         terminal_output = os.popen(run_command).read().strip()
         
+        if "Traceback" in terminal_output or "Error" in terminal_output or "Exception" in terminal_output:
+            return JsonResponse({"status": "error", "output": terminal_output})
+
         return JsonResponse({"status": "success", "output": terminal_output})
 
     except json.JSONDecodeError:
