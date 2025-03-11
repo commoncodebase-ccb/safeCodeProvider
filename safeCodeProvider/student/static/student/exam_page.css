@@ -5,9 +5,15 @@ body {
     background-color: #f9f9f9;
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    overflow: hidden; /* Sayfanın tamamında scroll'u kaldır */
 }
+.navbar{
+    background-color: #181d24;
+    height: 70px;
+    text-align: center;
+    align-content: center;
+    color: white;
+}
+
 
 .header {
     background-color: #052756;
@@ -29,9 +35,8 @@ body {
 
 .container {
     display: flex;
-    flex-grow: 1;
+    
     padding: 10px;
-    height: calc(100vh - 50px); /* Header ve footer hariç tüm ekranı kapla */
     overflow: hidden; /* Sayfanın tamamında scroll'u engelle */
 }
 
@@ -56,18 +61,17 @@ body {
 }
 
 .editor {
-    flex-grow: 1;
     display: flex;
     flex-direction: column;
     border: 1px solid #ddd;
     border-radius: 5px;
     height: 500px;
+    width: 70%;
     background-color: #052756;
     
 }
 
 .code-area {
-    flex-grow: 1;
     padding: 10px;
     resize: none;
     border: none;
@@ -83,7 +87,7 @@ body {
     overflow-y: auto;
 }
 
-.footer {
+.buttons {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
@@ -108,4 +112,12 @@ button:hover {
 
 #rusure{
     display:none;
+}
+footer {
+    background-color: #181d24;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    bottom: 0;
+    width: 100%;
 }

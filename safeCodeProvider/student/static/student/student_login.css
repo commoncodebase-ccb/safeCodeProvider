@@ -2,10 +2,18 @@ body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f9;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
     height: 100vh;
     margin: 0;
+}
+.navbar{
+    background-color: #181d24;
+    color: white;
+    height: 70px;
+    width: 100%;
+    text-align: center;
+    align-content: center;
 }
 
 .login-container {
@@ -15,6 +23,7 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     width: 350px; /* Genişliği artırarak daha dengeli bir görüntü sağladık */
     text-align: center;
+    margin-top: 200px;
 }
 
 h1 {
@@ -64,4 +73,14 @@ button:hover {
     color: red;
     font-size: 14px;
     margin-bottom: 15px;
+}
+
+footer {
+    background-color: #181d24;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
 }

@@ -18,46 +18,108 @@
       background: white;
       transition: all 0.3s ease;
     }
+    .container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 10px;
+}
+
+/* Sol taraf (PDF alanı) */
+.instruction {
+    flex: 1; /* 1 oranında yer kaplayacak */
+    background: #f4f4f4;
+    padding: 20px;
+    overflow-y: auto;
+    border-right: 2px solid #ddd;
+}
+
+/* Sağ taraf (Editör ve çıktı alanı) */
+.right-panel {
+    flex: 2; /* 2 oranında yer kaplayacak */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Editör */
+.editor {
+    border: 1px solid #ccc;
+}
+
+/* Çıktı Alanı */
+#output {
+    height: 200px;
+    background: #222;
+    color: #fff;
+    padding: 15px;
+    overflow-y: auto;
+}
+
+/* Butonlar */
+.buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.buttons button {
+    padding: 10px 20px;
+    border: none;
+    background: #007bff;
+    color: white;
+    cursor: pointer;
+}
+
+.buttons button:hover {
+    background: #0056b3;
+}
+
   </style>
 </head>
 <body>
-  <div class="header">
-      <span>Exam Page</span>
-      <span id= "timer">01:59:59</span>
+    <div class="navbar">
+        <h2 style="text-align: center; font-family: Unbounded, serif;">Safe Code Provider | Exam Panel <span style="margin:0 0 auto" id= "timer">01:59:59</span></h2>
+        
+        </div>
 
-  </div> 
   <div class="container">
       <!-- Sol tarafta PDF slaytlarını gösterecek alan -->
-      <div class="instruction" style="width:%30">
+      <div class="instruction" >
           <h3>Exam Instructions</h3>
-          <div class="instruction-content" id="pdf-container" style="overflow-y: auto; max-height: 100%;">
+          <div class="instruction-content" id="pdf-container" >
               <!-- PDF.js ile her sayfa için canvas eklenecek -->
           </div>
       </div>
-      <div style="display:flex; flex-direction:column; width:1000px">
-            <div class="editor" id="editor-container" style="position: relative;">
+        <!-- Sağ tarafta kod editörü ve çıktı alanı -->
+      <div class="right-panel" >
+            <div class="editor" id="editor-container" >
                 <!-- Monaco editörü için konteyner -->
                 <div id="monaco-editor" style="width: 100%; height: 100%;"></div>
                 <!-- Büyüt/Küçült düğmesi -->
                 <button id="toggle-btn" style="position: absolute; top: 10px; right: 10px; z-index: 1100;">Büyüt</button>
             </div>
-            <div id="output"style="padding:30px;height:300px">Output will be displayed here...</div>
-      </div>
+            <div id="output"style="padding:30px;height:200px">Output will be displayed here...</div>
 
+            <div class="buttons">
+                <button id="runButton" onclick="saveCode()">Run</button>
+                <button id="submitButton" onclick="RUSure()">Submit</button>
+            </div>
+      </div>
+      
   </div>
+
   
-  <div class="footer">
-      <button id="runButton" onclick="saveCode()">Run</button>
-      <button id="submitButton" onclick="RUSure()">Submit</button>
-  </div>
+
 
   <div id="rusure">
     <h2>Are You sure to submit?</h2>
       <button id="rusyesbutton" onclick="submitCode()">YES</button>
       <button id="rusnobutton" onclick="RUSurno()">NO</button>
   </div>
-  
-  
+  <footer style="font-family: Unbounded, serif;">
+    <p style="font-family: Unbounded, serif;">CommonCodeBase</p>
+</footer>
 
   <!-- Zamanlayıcı -->
   <script>

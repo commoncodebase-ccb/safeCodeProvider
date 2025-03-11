@@ -104,12 +104,73 @@
 
     <div class="right-container">
         <h2 style="margin-top: 20px;">Exam Password: {{ exam_password }}</h1>
-        <iframe src="" style="height: 600px; width: 800px; border: 2px solid black; margin-top: 30px;" frameborder="0"></iframe>
+            <div class="editor" id="editor-container" >
+                <!-- Monaco editörü için konteyner -->
+                <div id="monaco-editor" style="width: 100%; height: 100%;"></div>
+                <!-- Büyüt/Küçült düğmesi -->
+                <button id="toggle-btn" style="position: absolute; top: 10px; right: 10px; z-index: 1100;">Büyüt</button>
+            </div>
     </div>
 </div>
 <footer >
     <p style="font-family: Unbounded, serif;">CodeCommonBase</p>
 </footer>
 </body>
+  <!-- Monaco Editor CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs/loader.js"></script>
+  <script>
+      require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs' }});
+
+      var editor;
+
+      require(['vs/editor/editor.main'], function() { // exam_type değerini kullanarak dil belirliyoruz.
+          var langMap = {
+              'py': 'python',
+              'java': 'java',
+              'c': 'c'
+          };
+          var editorLanguage = langMap['{{ exam_type }}'] || 'plaintext';
+  
+          editor = monaco.editor.create(document.getElementById('monaco-editor'), {
+              value: `{{ assignment_content|escapejs }}`,
+              language: editorLanguage,
+              theme: "vs-dark"  // Koyu tema eklendi
+
+
+          });
+  
+          // Toggle butonu için orijinal stil bilgilerini saklayalım
+          var toggleBtn = document.getElementById('toggle-btn');
+          var editorContainer = document.getElementById('editor-container');
+          var isFullscreen = false;
+  
+          // Orijinal stil ayarlarını saklayalım
+          var originalStyle = {
+              position: editorContainer.style.position || '',
+              top: editorContainer.style.top || '',
+              left: editorContainer.style.left || '',
+              width: editorContainer.style.width || '',
+              height: editorContainer.style.height || ''
+          };
+  
+          toggleBtn.addEventListener('click', function() {
+              if (!isFullscreen) {
+                  editorContainer.classList.add('editor-fullscreen');
+                  toggleBtn.textContent = 'Küçült';
+              } else {
+                  editorContainer.classList.remove('editor-fullscreen');
+                  // Orijinal stil bilgilerini geri yükle
+                  editorContainer.style.position = originalStyle.position;
+                  editorContainer.style.top = originalStyle.top;
+                  editorContainer.style.left = originalStyle.left;
+                  editorContainer.style.width = originalStyle.width;
+                  editorContainer.style.height = originalStyle.height;
+                  toggleBtn.textContent = 'Büyüt';
+              }
+              isFullscreen = !isFullscreen;
+              editor.layout();
+          });
+      });
+    </script>  
 </html>
 

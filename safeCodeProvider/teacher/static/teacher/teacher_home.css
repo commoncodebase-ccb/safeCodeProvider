@@ -1,5 +1,19 @@
+
+  @font-face {
+    font-family: "Chakra Petch";
+    src: url('../../../fonts/ChakraPetch-Regular.ttf') format("truetype");;
+}
+@font-face {
+    font-family: "Lexend Deca";
+    src: url('../../../fonts/LexendDeca-Regular.ttf') format("truetype");;
+}
+@font-face {
+    font-family: "Unbounded";
+    src: url('../../../fonts/Unbounded-Regular.ttf') format("truetype");;
+}
+
 *{
-    font-family: "Chakra Petch", serif;
+    font-family: "Chakra Petch", sans-serif;
     margin:0;
     padding:0;
     box-sizing: border-box;
