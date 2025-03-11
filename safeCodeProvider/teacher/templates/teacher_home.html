@@ -74,7 +74,7 @@
         </div>
     </div>
 
-    <div id="success_message" class="success-message" style="margin-top: 400px;">
+    <div id="success_message" class="success-message" >
         <p>Exam created successfully!</p>
         <button id="create_exam_btn" onclick="goToSubmit()">Go To Submits Page</button>
     </div>
@@ -238,7 +238,6 @@
             })
             .then(response => response.json())
             .then(data => {
-                alert("Exam Created!\nExam Password: " + password);
             })
             .catch(error => console.error(error));
         }
