@@ -1,11 +1,11 @@
 * {
+    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
 body {
-    font-family: Unbounded, serif;
     height: 100vh;
     display: flex;
     flex-direction: column;
@@ -71,11 +71,6 @@ body {
     margin-top: 10px;
 }
 
-.buttons {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-}
 
 button {
     padding: 10px 15px;
