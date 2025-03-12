@@ -4,15 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch&family=Lexend+Deca:wght@300&family=Nova+Square&family=Unbounded&display=swap" rel="stylesheet">  
-
     <title>Submits Page</title>
     <style>
 
 *{
-    font-family: "Chakra Petch", serif;
+    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     margin:0;
     padding:0;
     box-sizing: border-box;
@@ -91,7 +87,7 @@
     <h2 style="color: #181d24 ;text-align: center; margin-top: 20px;">You can share this url with your students. They will see the exam page at this url:</h2>
     <h2 style="color: #ff4d00;text-align: center;">http://127.0.0.1:8001/</h2>
 
-<div class="container" style="color: #181d24" >
+<div class="container" style="color: #181d24; margin-bottom: 50px;" >
     <div class="left-container">
         <h2 style="text-align: center; margin-top: 20px;">Student List</h2>
         <div class="student-container">
@@ -106,7 +102,7 @@
     </div>
 
 
-    <div class="right-container">
+    <div class="right-container" style="margin-right: 60px;">
         <h2 style="margin-top: 20px;">Exam Password: {{ exam_password }}</h1>
             <div class="editor" id="editor-container" style= "height: 700px">
                 <!-- Monaco editörü için konteyner -->
@@ -115,7 +111,7 @@
     </div>
 </div>
 <footer >
-    <p style="font-family: Unbounded, serif;">CodeCommonBase</p>
+    <p style="font-family: Unbounded, serif; ">CodeCommonBase</p>
 </footer>
 </body>
   <!-- Monaco Editor CDN -->
