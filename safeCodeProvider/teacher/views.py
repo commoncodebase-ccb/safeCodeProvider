@@ -5,6 +5,9 @@ import os
 from django.conf import settings
 import csv
 import shutil
+import ctypes
+import sys
+import platform
 
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
@@ -284,3 +287,66 @@ def bring_code(request):
     except Exception as e:
         return JsonResponse({"error": f"kod dondurulurken bir hata olustu: {str(e)}"})
     
+
+@csrf_exempt
+def open_student_port(request):
+    if request.method == "POST":
+        try:
+            # Kullanıcının ana dizinini al (Örneğin: /home/kullanici veya C:\Users\mazlu)
+            home_dir = os.path.expanduser("~")
+
+            # SafeCodeProvider'ın tam yolu
+            project_path = os.path.join(home_dir, "safeCodeProvider", "safeCodeProvider")
+
+            # İşletim sistemini tespit et
+            system_type = platform.system()
+
+            if system_type == "Windows":
+                # Windows için yeni terminal açıp Django sunucusunu başlat
+                os.system(f'start cmd /k "cd /d {project_path} && py manage.py runserver 8001 --settings=safeCodeProvider.settings.student_settings"')
+
+            elif system_type in ["Linux", "Darwin"]:  # Darwin = MacOS
+                # MacOS & Linux için yeni terminal aç ve Django sunucusunu başlat
+                os.system(f'gnome-terminal -- bash -c "cd {project_path} && python3 manage.py runserver 8001 --settings=safeCodeProvider.settings.student_settings; exec bash"')
+
+            else:
+                return JsonResponse({"error": "Bilinmeyen işletim sistemi"}, status=500)
+
+            # Config.json dosyasından "exam_time" değerini oku
+            exam_time = 0  # Varsayılan değer
+            if os.path.exists(CONFIG_FILE):
+                with open(CONFIG_FILE, "r") as f:
+                    config = json.load(f)
+                    exam_time = config.get("exam_time", 0)
+
+            return JsonResponse({"message": "✅ 8001 portu açıldı!", "exam_time": exam_time}, status=200)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+
+# Yönetici yetkisi olup olmadığını kontrol et
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
+
+
+@csrf_exempt
+def close_student_port(request):
+    if request.method == "POST":
+        try:
+            # Linux/macOS için iptables komutu
+            #os.system("sudo iptables -A INPUT -p tcp --dport 8001 -j DROP")
+            
+            # `close_port.py` dosyasını çalıştır
+            
+            os.system("start cmd /k py close_port.py")
+            return JsonResponse({"message": "8001 portu kapatıldı!"}, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
