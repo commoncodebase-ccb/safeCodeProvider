@@ -33,7 +33,7 @@ def student_control(request):
                 return JsonResponse({'status': 'error', 'message': 'Student list file not found'})  
         except FileNotFoundError:
             return JsonResponse({'status': 'error', 'message': 'Student list file not found'})  
-
+ 
         try:
             with open(student_list_file, 'r', encoding='utf-8') as csvfile:  
                 reader = csv.reader(csvfile)  
@@ -47,6 +47,36 @@ def student_control(request):
         if not student_exists:  
             return JsonResponse({'status': 'error', 'message': 'Student not found in the list'})  
 
+# JSON dosyasının tam yolunu belirle
+        json_path = os.path.join(settings.BASE_DIR, "students.json")
+
+        # JSON dosyasını oku
+        if os.path.exists(json_path):
+            with open(json_path, "r", encoding="utf-8") as json_file:
+                students_data = json.load(json_file)  # JSON verisini liste olarak al
+        
+           # Kullanıcının ID'sini kontrol et ve isLogged değerini güncelle
+            user_found = False
+            for student in students_data:
+                if student["id"] == student_id:
+                    if student["isLogged"] == "true":
+                        return JsonResponse({
+                            "status": "error",
+                            "message": "You are already logged in and cannot enter the exam."
+                        })
+                    student["isLogged"] = "true"
+                    user_found = True
+                    break
+
+            if user_found:
+                # Güncellenmiş veriyi tekrar JSON dosyasına yaz
+                with open(json_path, "w", encoding="utf-8") as json_file:
+                    json.dump(students_data, json_file, indent=4, ensure_ascii=False)
+
+
+            else:
+                return JsonResponse({"status": "error", "message": "Student ID not found"})
+            
         return JsonResponse({
         'status': 'success',
         'redirect_url': '/exam/',

@@ -67,6 +67,29 @@ def upload_files(request):
 
     return JsonResponse({'error': 'Geçersiz istek'}, status=400)
 
+def convert_csv_to_json(csv_filename):
+    # CSV dosyasının tam yolunu oluştur
+    csv_path = os.path.join(settings.MEDIA_ROOT, "student_list", csv_filename)
+
+    # JSON dosyasının tam yolunu oluştur (Projenin kök dizini)
+    json_path = os.path.join(settings.BASE_DIR, "students.json")
+
+    students_data = []
+
+    # CSV dosyasını oku
+    with open(csv_path, mode="r", encoding="utf-8") as csv_file:
+        csv_reader = csv.reader(csv_file)  # Sadece virgülle ayrılmış verileri okuyoruz
+        for row in csv_reader:
+            if len(row) == 2:  # Her satırda iki veri olduğundan emin ol
+                student_id, _ = row  # Sadece id'yi al, ismi kullanmıyoruz
+                students_data.append({"id": student_id, "isLogged": "false"})
+
+    # JSON dosyasına yaz
+    with open(json_path, mode="w", encoding="utf-8") as json_file:
+        json.dump(students_data, json_file, indent=4, ensure_ascii=False)
+
+    return json_path
+
 @csrf_exempt
 def start_exam(request):
     if request.method == "POST":
@@ -88,6 +111,8 @@ def start_exam(request):
             exam_instruction_name = save_uploaded_file(exam_instruction, "exam_instruction")
             assignment_file_name = save_uploaded_file(assignment_file, "assignment_file")
 
+            convert_csv_to_json(student_list_name)
+            
             config_path = "config.json"
             exam_data = {}
             if os.path.exists(config_path):

@@ -169,6 +169,10 @@ footer {
 <body>
     <div class="navbar">
         <h2>Safe Code Provider | Exam Panel <span style="color: #ff4d00; margin-left: 30px;" id="timer"></span></h2>
+        <div id="student_info">
+            <p>Student ID: <span id="user_id"></span></p>
+            <p>Student Name: <span id="user_name"></span></p>
+        </div>
     </div>
 
     <div class="container">
@@ -263,6 +267,32 @@ footer {
         // Sayfa açıldığında süreyi al ve geri sayımı başlat
         fetchExamTime(); 
         */
+  </script>
+  <script>
+    window.addEventListener("beforeunload", function (event) {
+        event.preventDefault(); 
+        event.returnValue = "Are you sure you want to leave? Your progress may be lost.";
+    });
+    
+    window.addEventListener("popstate", function (event) {
+        event.preventDefault(); 
+        RUSure(); 
+    });
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // localStorage'dan öğrenci ID ve ismini çek
+      const studentId = localStorage.getItem("student_id");
+      const studentName = localStorage.getItem("student_name");
+  
+      // Eğer bilgiler varsa, <span> elemanlarına yazdır
+      if (studentId && studentName) {
+          document.getElementById('user_id').textContent = studentId;
+          document.getElementById('user_name').textContent = studentName;
+      } else {
+          console.log("No student information found in localStorage.");
+      }
+  });
   </script>
   
   <!-- PDF.js Kütüphanesi -->
