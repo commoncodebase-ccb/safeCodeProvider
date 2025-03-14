@@ -74,6 +74,24 @@
     bottom: 0;
     width: 100%;
 }
+#ssbuttons {
+    display: flex; 
+    flex-direction: row; 
+    gap: 30px; 
+    justify-content: center; 
+    margin-top: 30px;
+}
+#ssbuttons button {
+    background-color:#ff4d00 ;
+    font-size: 16px;
+    color: #181d24;
+    font-weight: 700;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
 #monaco-editor .view-lines {
     text-align: left !important; /* Metni sola yasla */
 }
@@ -82,10 +100,17 @@
 <body>
     <div class="navbar">
         <h2 style="text-align: center; font-family: Unbounded, serif;">Safe Code Provider | Submits Panel</h2>
+        <h2>Sınav Süresi: <span id="timer" style="color: #ff4d00;">--:--</span></h2>
+
     </div>
 
-    <h2 style="color: #181d24 ;text-align: center; margin-top: 20px;">You can share this url with your students. They will see the exam page at this url:</h2>
+    <h2 style="color: #181d24 ;text-align: center; margin-top: 20px;">You can share this url with your students. They will see the exam page at this url after you click "Start Exam" button.:</h2>
     <h2 style="color: #ff4d00;text-align: center;">http://127.0.0.1:8001/</h2>
+    <div id="ssbuttons">
+        <button id="openPortButton">Start Exam</button>
+        <button id="closePortButton">Finish Exam</button>
+    </div>
+
 
 <div class="container" style="color: #181d24; margin-bottom: 50px;" >
     <div class="left-container">
@@ -179,5 +204,80 @@
     }
 
     </script>  
+
+    <script>
+// CSRF token'ı almak için yardımcı fonksiyon
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+            let cookies = document.cookie.split(";");
+            for (let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+
+        document.getElementById("openPortButton").addEventListener("click", function() {
+    fetch("/teacher/open-port/", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+            "Content-Type": "application/json"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.exam_time) {
+            startCountdown(data.exam_time); // Geri sayımı başlat
+        } else {
+            alert(data.message || data.error);
+        }
+    })
+    .catch(error => console.error("Error:", error));
+});
+
+// Geri Sayım Fonksiyonu
+function startCountdown(minutes) {
+    let totalSeconds = minutes * 60; // Dakikayı saniyeye çevir
+
+    function updateTimer() {
+        let minutesLeft = Math.floor(totalSeconds / 60);
+        let secondsLeft = totalSeconds % 60;
+        document.getElementById("timer").textContent = `${minutesLeft}:${secondsLeft.toString().padStart(2, '0')}`;
+
+        if (totalSeconds > 0) {
+            totalSeconds--;
+            setTimeout(updateTimer, 1000); // Her saniye güncelle
+        } else {
+            document.getElementById("timer").textContent = "Süre Bitti!";
+        }
+    }
+
+    updateTimer();
+}
+    </script>
+
+    <script>
+        document.getElementById("closePortButton").addEventListener("click", function() {
+            fetch("/teacher/close-port/", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCookie("csrftoken"),
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message || data.error);
+            })
+            .catch(error => console.error("Error:", error));
+        });
+        </script>
 </html>
 
