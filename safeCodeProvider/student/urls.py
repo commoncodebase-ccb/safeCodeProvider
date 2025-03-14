@@ -10,7 +10,7 @@ urlpatterns = [
     path('save_code/', views.save_code, name='save_code'),
     path('run_code/', views.run_code, name='run_code'),
     path('delete_docker/', views.delete_docker, name='delete_docker'),
-    path("get_exam_time/", views.get_exam_time, name="get_exam_time"),
+    # path("get_exam_time/", views.get_exam_time, name="get_exam_time"),
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
