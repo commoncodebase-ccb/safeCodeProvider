@@ -7,8 +7,8 @@ urlpatterns = [
     path('start_exam/', start_exam, name='start_exam'),
     path('submits/', submits_page, name='submits_page'),
     path('bring_code/', bring_code, name='bring_code'),
-    path("open-port/", open_student_port, name="open_port"),
-    path("close-port/", close_student_port, name="close_port"),
+    path("open_port/", open_student_port, name="open_port"),
+    path("close_port/", close_student_port, name="close_port"),
 
 
 ]

@@ -126,7 +126,7 @@
         }     
         
         function goToSubmit() {
-            window.location.href = "/teacher/submits/";
+            window.location.href = "/submits/";
         }
 
 /**
@@ -199,7 +199,7 @@
 
             let time = document.getElementById("exam_time").value;
             let exam_name = document.getElementById("exam_name").value;
-            let outputDirectory = document.getElementById("output_directory").value;
+            //let outputDirectory = document.getElementById("output_directory").value;
             let studentList = document.getElementById("student_list").files[0];
             let examInstruction = document.getElementById("exam_instruction").files[0];
             let assignmentFile = document.getElementById("assignment_file").files[0];
@@ -225,7 +225,7 @@
             formData.append("assignment_file", assignmentFile);
             let csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-            fetch('/teacher/start_exam/', {
+            fetch('/start_exam/', {
                 method: 'POST',
                 body: formData,
                 headers: {

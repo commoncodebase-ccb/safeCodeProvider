@@ -77,7 +77,7 @@ ROOT_URLCONF = 'safeCodeProvider.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+            'DIRS': [os.path.join(BASE_DIR, 'student/templates'),os.path.join(BASE_DIR, 'teacher/templates')],  
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

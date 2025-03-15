@@ -92,6 +92,7 @@ def convert_csv_to_json(csv_filename):
 
 @csrf_exempt
 def start_exam(request):
+    
     if request.method == "POST":
         try:
             exam_name = request.POST.get("exam_name")
@@ -315,6 +316,7 @@ def bring_code(request):
 
 @csrf_exempt
 def open_student_port(request):
+    print("Pathhhhh   " + os.getcwd())
     if request.method == "POST":
         try:
             # Kullanıcının ana dizinini al (Örneğin: /home/kullanici veya C:\Users\mazlu)
@@ -322,6 +324,7 @@ def open_student_port(request):
 
             # SafeCodeProvider'ın tam yolu
             project_path = os.path.join(home_dir, "safeCodeProvider", "safeCodeProvider")
+
 
             # İşletim sistemini tespit et
             system_type = platform.system()
@@ -332,6 +335,7 @@ def open_student_port(request):
 
             elif system_type in ["Linux", "Darwin"]:  # Darwin = MacOS
                 # MacOS & Linux için yeni terminal aç ve Django sunucusunu başlat
+                print("Pathhhhh   " + project_path)
                 os.system(f'gnome-terminal -- bash -c "cd {project_path} && python3 manage.py runserver 8001 --settings=safeCodeProvider.settings.student_settings; exec bash"')
 
             else:
@@ -347,9 +351,9 @@ def open_student_port(request):
             return JsonResponse({"message": "✅ 8001 portu açıldı!", "exam_time": exam_time}, status=200)
 
         except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
+            return JsonResponse({"error": str(e) , "path": os.getcwd()}, status=500)
 
-    return JsonResponse({"error": "Invalid request"}, status=400)
+    return JsonResponse({"error": "Invalid request", "path": os.getcwd()}, status=400)
 
 
 # Yönetici yetkisi olup olmadığını kontrol et
