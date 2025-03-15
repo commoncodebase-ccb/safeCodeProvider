@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+import socket
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -26,7 +28,27 @@ SECRET_KEY = 'django-insecure-yk&1nr#ea&)uilaci9hjvh1vdcfi1a5^ulrx+ej69vsys87)do
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+
+
+
+
+
+ALLOWED_HOSTS = ["127.0.0.1","0.0.0.0"]
+# Get the current local network cabled IP address
+
+
+# Read the local IP from the environment variable
+local_ip = os.getenv("LOCAL_IP")
+
+# Add the local IP to ALLOWED_HOSTS if it exists
+if local_ip:
+    ALLOWED_HOSTS.append(local_ip)
+
+
+
+
+
+
 
 
 # Application definition
