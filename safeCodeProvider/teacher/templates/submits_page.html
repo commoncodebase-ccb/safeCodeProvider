@@ -171,7 +171,7 @@
       function bringCode(studentId, studentName) {
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        fetch("/teacher/bring_code/",{
+        fetch("/bring_code/",{
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -224,7 +224,7 @@
 
 
         document.getElementById("openPortButton").addEventListener("click", function() {
-    fetch("/teacher/open-port/", {
+    fetch("/open_port/", {
         method: "POST",
         headers: {
             "X-CSRFToken": getCookie("csrftoken"),
@@ -265,7 +265,7 @@ function startCountdown(minutes) {
 
     <script>
         document.getElementById("closePortButton").addEventListener("click", function() {
-            fetch("/teacher/close-port/", {
+            fetch("/close_port/", {
                 method: "POST",
                 headers: {
                     "X-CSRFToken": getCookie("csrftoken"),

@@ -178,8 +178,8 @@ def run_code(request):
         if not student_id or not student_name:
             return JsonResponse({"status": "error", "message": "Incomplete information was sent."})
 
-        container_name = f"{student_id}-{student_name}-container" #220717005-emre-container
-        image_name = f"{student_id}-{student_name}" #220717005-emre
+        container_name = f"{student_id}-{student_name.lower()}-container" #220717005-emre-container
+        image_name = f"{student_id}-{student_name.lower()}" #220717005-emre
 
         config_path = "config.json"
 

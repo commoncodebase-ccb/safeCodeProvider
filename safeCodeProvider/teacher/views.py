@@ -92,7 +92,7 @@ def convert_csv_to_json(csv_filename):
 
 @csrf_exempt
 def start_exam(request):
-    
+
     if request.method == "POST":
         try:
             exam_name = request.POST.get("exam_name")
@@ -323,8 +323,9 @@ def open_student_port(request):
             home_dir = os.path.expanduser("~")
 
             # SafeCodeProvider'ın tam yolu
-            project_path = os.path.join(home_dir, "safeCodeProvider", "safeCodeProvider")
+            project_path = os.getcwd()
 
+            print("Pathhhhh   " + project_path)
 
             # İşletim sistemini tespit et
             system_type = platform.system()
@@ -333,10 +334,14 @@ def open_student_port(request):
                 # Windows için yeni terminal açıp Django sunucusunu başlat
                 os.system(f'start cmd /k "cd /d {project_path} && py manage.py runserver 8001 --settings=safeCodeProvider.settings.student_settings"')
 
-            elif system_type in ["Linux", "Darwin"]:  # Darwin = MacOS
-                # MacOS & Linux için yeni terminal aç ve Django sunucusunu başlat
-                print("Pathhhhh   " + project_path)
-                os.system(f'gnome-terminal -- bash -c "cd {project_path} && python3 manage.py runserver 8001 --settings=safeCodeProvider.settings.student_settings; exec bash"')
+            
+            elif system_type == "Darwin":  # macOS
+                # For macOS, use the `open` command to launch Terminal
+                os.system(f'open -a Terminal "{project_path}" && python3 manage.py runserver 8001 --settings=safeCodeProvider.settings.student_settings')
+
+            elif system_type == "Linux":
+                # For Linux, use xterm or another terminal emulator
+                os.system(f'xterm -e "cd {project_path} && python3 manage.py runserver 8001 --settings=safeCodeProvider.settings.student_settings"')
 
             else:
                 return JsonResponse({"error": "Bilinmeyen işletim sistemi"}, status=500)
