@@ -379,12 +379,14 @@ require(['vs/editor/editor.main'], function() {
             editorContainer.style.top = "";
             editorContainer.style.left = "";
             editorContainer.style.width = "100%";
-            editorContainer.style.height = "500px";
+            editorContainer.style.height = "50%";
             editorContainer.style.zIndex = "";
             toggleBtn.textContent = "⤢";
         }
         isFullscreen = !isFullscreen;
+        setTimeout(() => {
         editor.layout();
+    }, 0); 
     });
 });
 
