@@ -39,13 +39,10 @@ body {
 .instruction {
     width: 33%;
     background-color: #f8f8f8;
-    padding: 20px;
-    overflow-y: auto;
-}
+    padding: 20px;}
 
 .instruction-content {
     padding: 10px;
-    height: calc(100% - 40px);
 }
 
 .right-panel {
@@ -56,7 +53,7 @@ body {
 }
 
 .editor {
-    flex: 2;
+    height: 500px;
     position: relative;
     background-color: #1e1e1e;
     color: white;
@@ -64,7 +61,7 @@ body {
 
 #monaco-editor {
     width: 100%;
-    height: 100%;
+    height: 500px;
 }
 
 #toggle-btn {
@@ -77,11 +74,13 @@ body {
 }
 
 #output {
-    flex: 1;
+    height: 250px;
     background-color: #1e1e1e;
     color: white;
     padding: 15px;
     margin-top: 10px;
+    max-height: 250px;
+    overflow-y: auto;
 }
 
 .buttons {
@@ -298,97 +297,103 @@ footer {
   <!-- PDF.js Kütüphanesi -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
   <script>
-      var pdfUrl = '{{ pdf_url }}';
-      if (pdfUrl) {
-          var pdfjsLib = window['pdfjs-dist/build/pdf'];
-          pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
-          
-          pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
-              var pdfContainer = document.getElementById('pdf-container');
-              // Tüm sayfaları render et
-              for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-                  pdf.getPage(pageNum).then(function(page) {
-                      var scale = 1.5;
-                      var viewport = page.getViewport({ scale: scale });
-                      var canvas = document.createElement('canvas');
-                      canvas.style.width = '100%';
-                      canvas.style.marginBottom = '10px';
-                      var context = canvas.getContext('2d');
-                      canvas.height = viewport.height;
-                      canvas.width = viewport.width;
-                      var renderContext = {
-                          canvasContext: context,
-                          viewport: viewport
-                      };
-                      page.render(renderContext);
-                      pdfContainer.appendChild(canvas);
-                  });
-              }
-          }).catch(function(error) {
-              console.error('PDF yüklenirken hata oluştu: ' + error);
-          });
-      } else {
-          console.error("PDF URL bulunamadı.");
-      }
-  </script>
+    var pdfUrl = '{{ pdf_url }}';
+    if (pdfUrl) {
+        var pdfjsLib = window['pdfjs-dist/build/pdf'];
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+
+        pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
+            var pdfContainer = document.getElementById('pdf-container');
+            pdfContainer.style.overflowY = 'auto'; // Scroll aktif hale getirildi
+            pdfContainer.style.maxHeight = '700px'; // Konteynerin maksimum yüksekliği belirlendi
+
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                pdf.getPage(pageNum).then(function(page) {
+                    var scale = 1.5;
+                    var viewport = page.getViewport({ scale: scale });
+                    var canvas = document.createElement('canvas');
+                    canvas.style.width = '100%';
+                    canvas.style.display = pageNum === 1 ? 'block' : 'block'; // Sayfalar dikey olacak
+                    var context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    var renderContext = {
+                        canvasContext: context,
+                        viewport: viewport
+                    };
+                    page.render(renderContext);
+                    pdfContainer.appendChild(canvas);
+                });
+            }
+        }).catch(function(error) {
+            console.error('PDF yüklenirken hata oluştu: ' + error);
+        });
+    } else {
+        console.error("PDF URL bulunamadı.");
+    }
+</script>
   
   <!-- Monaco Editor CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs/loader.js"></script>
   <script>
-    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs' }});
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs' } });
 
-var editor;
-var isFullscreen = false;
+    var editor;
+    var isFullscreen = false;
 
-require(['vs/editor/editor.main'], function() {
-    var langMap = {
-        'py': 'python',
-        'java': 'java',
-        'c': 'c'
-    };
-    var editorLanguage = langMap['{{ exam_type }}'] || 'plaintext';
+    require(['vs/editor/editor.main'], function() {
+        var langMap = {
+            'py': 'python',
+            'java': 'java',
+            'c': 'c'
+        };
+        var editorLanguage = langMap['{{ exam_type }}'] || 'plaintext';
 
-    var editorContainer = document.getElementById('editor-container');
-    var toggleBtn = document.getElementById('toggle-btn');
+        var editorContainer = document.getElementById('editor-container');
+        var toggleBtn = document.getElementById('toggle-btn');
 
-    // Sayfa açıldığında editör geniş başlayacak
-    editorContainer.style.width = "100%";
-    editorContainer.style.height = "500px"; // Büyük başlangıç boyutu
+        // **Orijinal boyutları kaydet**
+        var initialWidth = "100%";
+        var initialHeight = "500px";
 
-    editor = monaco.editor.create(document.getElementById('monaco-editor'), {
-        value: `{{ assignment_content|escapejs }}`,
-        language: editorLanguage,
-        theme: "vs-dark"
+        editorContainer.style.width = initialWidth;
+        editorContainer.style.height = initialHeight;
+
+        editor = monaco.editor.create(document.getElementById('monaco-editor'), {
+            value: `{{ assignment_content|escapejs }}`,
+            language: editorLanguage,
+            theme: "vs-dark"
+        });
+
+        toggleBtn.addEventListener('click', function() {
+            if (!isFullscreen) {
+                // **Tam ekran modu**
+                editorContainer.style.position = "fixed";
+                editorContainer.style.top = "0";
+                editorContainer.style.left = "0";
+                editorContainer.style.right = "0";
+                editorContainer.style.width = "100vw";
+                editorContainer.style.height = "100vh";
+                editorContainer.style.zIndex = "9999";
+                toggleBtn.textContent = "⤡";
+            } else {
+                // **Başlangıç boyutlarına dön**
+                editorContainer.style.position = "";
+                editorContainer.style.top = "";
+                editorContainer.style.left = "";
+                editorContainer.style.right = "";
+                editorContainer.style.width = initialWidth;
+                editorContainer.style.height = initialHeight;
+                editorContainer.style.zIndex = "";
+                toggleBtn.textContent = "⤢";
+            }
+
+            isFullscreen = !isFullscreen;
+            setTimeout(() => {
+                editor.layout();
+            }, 0);
+        });
     });
-
-    toggleBtn.addEventListener('click', function() {
-        if (!isFullscreen) {
-            // Tam ekran modu
-            editorContainer.style.position = "fixed";
-            editorContainer.style.top = "0";
-            editorContainer.style.left = "0";
-            editorContainer.style.right = "10px";
-
-            editorContainer.style.width = "100vw";
-            editorContainer.style.height = "100vh";
-            editorContainer.style.zIndex = "9999";
-            toggleBtn.textContent = "⤡";
-        } else {
-            // Başlangıçtaki geniş moda geri dön
-            editorContainer.style.position = "";
-            editorContainer.style.top = "";
-            editorContainer.style.left = "";
-            editorContainer.style.width = "100%";
-            editorContainer.style.height = "50%";
-            editorContainer.style.zIndex = "";
-            toggleBtn.textContent = "⤢";
-        }
-        isFullscreen = !isFullscreen;
-        setTimeout(() => {
-        editor.layout();
-    }, 0); 
-    });
-});
 
       function saveCode() {
         const code = editor.getValue();
