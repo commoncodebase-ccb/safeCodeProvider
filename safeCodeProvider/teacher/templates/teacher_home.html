@@ -210,12 +210,12 @@
             }
 
             
-            let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            let chars = "0123456789";
             let password = "";
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < 6; i++) {
                 password += chars.charAt(Math.floor(Math.random() * chars.length));
             }
-
+            
             let formData = new FormData();
             formData.append("time", time);
             formData.append("exam_name", exam_name);
