@@ -176,10 +176,13 @@ footer {
 
     <div class="container">
         <!-- Sol tarafta PDF slaytlarını gösterecek alan -->
-        <div class="instruction">
-            <h3>Exam Instructions</h3>
+        <div class="instruction" style="overflow-y:hidden ;">
+            <div style="display: flex; flex-direction: row; justify-content: space-between; justify-items: center;">
+                <h3>Exam Instructions</h3> 
+                <button id="fullscreenBtn">ZOOM PDF</button>
+            </div>
             <div style="margin-top: 10px;" class="instruction-content" id="pdf-container">
-                <!-- PDF.js ile her sayfa için canvas eklenecek -->
+                <iframe id="pdf-frame" style="width: 100%; height: 700px; border: none;"></iframe>
             </div>
         </div>
 
@@ -213,60 +216,7 @@ footer {
       <button id="rusnobutton" onclick="RUSurno()">NO</button>
   </div>
 
-  <!-- Zamanlayıcı -->
-  <script>
-    /*
-        async function fetchExamTime() {
-            try {
-                const response = await fetch("/get_exam_time/");
-                const data = await response.json();
-                if (data.exam_time) {
-                    startTimer(data.exam_time * 60);  // Dakika -> Saniyeye çevir
-                }
-            } catch (error) {
-                console.error("Süre alınamadı:", error);
-            }
-        }
 
-        function startTimer(duration) {
-            let timer = duration, hours, minutes, seconds;
-            const timerElement = document.getElementById("timer");
-            const runButton = document.getElementById("runButton");
-            const submitButton = document.getElementById("submitButton");
-
-            function updateTimer() {
-                hours = Math.floor(timer / 3600);
-                minutes = Math.floor((timer % 3600) / 60);
-                seconds = timer % 60;
-
-                timerElement.textContent = 
-                    String(hours).padStart(2, '0') + ":" + 
-                    String(minutes).padStart(2, '0') + ":" + 
-                    String(seconds).padStart(2, '0');
-
-                if (timer > 0) {
-                    timer--;
-                    setTimeout(updateTimer, 1000);
-                } else {
-                    // Süre dolunca butonları devre dışı bırak
-                    runButton.disabled = true;
-                    submitButton.disabled = true;
-
-                    // Butonları gri yapmak için CSS ekle
-                    runButton.style.backgroundColor = "#ccc";
-                    submitButton.style.backgroundColor = "#ccc";
-                    runButton.style.cursor = "not-allowed";
-                    submitButton.style.cursor = "not-allowed";
-                }
-            }
-
-            updateTimer();
-        }
-
-        // Sayfa açıldığında süreyi al ve geri sayımı başlat
-        fetchExamTime(); 
-        */
-  </script>
   <script>
     window.addEventListener("beforeunload", function (event) {
         event.preventDefault(); 
@@ -293,41 +243,38 @@ footer {
       }
   });
   </script>
-  
-  <!-- PDF.js Kütüphanesi -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+  <script>
+  document.getElementById("fullscreenBtn").addEventListener("click", function() {
+    var iframe = document.getElementById("pdf-frame");
+
+    if (document.fullscreenElement) {
+        document.exitFullscreen(); 
+    } else {
+        if (iframe.requestFullscreen) {
+            iframe.requestFullscreen();
+        } else if (iframe.mozRequestFullScreen) { 
+            iframe.mozRequestFullScreen();
+        } else if (iframe.webkitRequestFullscreen) { 
+            iframe.webkitRequestFullscreen();
+        } else if (iframe.msRequestFullscreen) { 
+            iframe.msRequestFullscreen();
+        }
+    }
+});
+</script>
+
+<script>
+document.addEventListener("keydown", function(event) {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
+        event.preventDefault(); 
+    }
+});
+</script>
+
   <script>
     var pdfUrl = '{{ pdf_url }}';
     if (pdfUrl) {
-        var pdfjsLib = window['pdfjs-dist/build/pdf'];
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
-
-        pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
-            var pdfContainer = document.getElementById('pdf-container');
-            pdfContainer.style.overflowY = 'auto'; // Scroll aktif hale getirildi
-            pdfContainer.style.maxHeight = '700px'; // Konteynerin maksimum yüksekliği belirlendi
-
-            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-                pdf.getPage(pageNum).then(function(page) {
-                    var scale = 1.5;
-                    var viewport = page.getViewport({ scale: scale });
-                    var canvas = document.createElement('canvas');
-                    canvas.style.width = '100%';
-                    canvas.style.display = pageNum === 1 ? 'block' : 'block'; // Sayfalar dikey olacak
-                    var context = canvas.getContext('2d');
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-                    var renderContext = {
-                        canvasContext: context,
-                        viewport: viewport
-                    };
-                    page.render(renderContext);
-                    pdfContainer.appendChild(canvas);
-                });
-            }
-        }).catch(function(error) {
-            console.error('PDF yüklenirken hata oluştu: ' + error);
-        });
+        document.getElementById('pdf-frame').src = pdfUrl;
     } else {
         console.error("PDF URL bulunamadı.");
     }
@@ -518,6 +465,8 @@ footer {
             if (data.status === "success") {
                 alert("game over.")
             }
+            document.getElementById("overlay").style.display = "none";
+            document.getElementById("rusure").style.display = "none";
         })
         .catch(error => console.error("Kod kaydedilirken hata oluştu:", error));
     }
