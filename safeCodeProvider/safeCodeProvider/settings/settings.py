@@ -46,9 +46,9 @@ if local_ip:
 
 
 
-
-
-
+X_FRAME_OPTIONS = 'ALLOWALL'  # Tüm sitelerin iframe içine gömmesine izin verir
+SECURE_BROWSER_XSS_FILTER = False
+SECURE_CONTENT_TYPE_NOSNIFF = False
 
 
 # Application definition
@@ -69,7 +69,6 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'safeCodeProvider.urls'
