@@ -1,6 +1,7 @@
 import csv  
 import os  
-import json  
+import json
+import subprocess  
 from django.shortcuts import render 
 from django.http import JsonResponse  
 from django.conf import settings
@@ -110,7 +111,7 @@ def exam_page(request):
     
     # assignment_file klasöründen dosya içeriğini dinamik olarak oku
     assignment_content = ''
-    assignment_folder = os.path.join(settings.MEDIA_ROOT, 'assignment_file')
+    assignment_folder = os.path.join(settings.MEDIA_ROOT, 'assignment_file') 
     if os.path.exists(assignment_folder):
         assignment_files = [f for f in os.listdir(assignment_folder) if not f.startswith('.')]
         if assignment_files:
@@ -199,21 +200,44 @@ def run_code(request):
         container_status = os.popen(check_status_command).read().strip()
 
         # Eski container varsa kaldır
-        if container_status:
-            os.system(f"docker rm -f {container_name}")
+        #if container_status:
+        #    os.system(f"docker rm -f {container_name}")
 
-        os.system(f"docker build -t {image_name} {student_folder}")
+        #os.system(f"docker build -t {image_name} {student_folder}")
 
         # Yeni container oluştur ve kodu çalıştıru
-        run_command = f"docker run --rm --name {container_name} -v {student_folder}:/app/uploads {image_name} python3 /app/uploads/{file_name} 2>&1"
-        
-        terminal_output = os.popen(run_command).read().strip()
-        
-        if "Traceback" in terminal_output or "Error" in terminal_output or "Exception" in terminal_output:
-            return JsonResponse({"status": "error", "output": terminal_output})
+        #run_command = f"docker run --rm --name {container_name} -v {student_folder}:/app/uploads {image_name} python3 /app/uploads/{file_name} 2>&1"
+        code_file_path = os.path.join(student_folder, file_name)
+        copy_command = f"docker cp {code_file_path} {container_name}:/app/{file_name}"
+        os.system(copy_command)
+        try:
+                result = subprocess.run(
+                    f"docker exec {container_name} python /app/{file_name}",
+                    shell=True,
+                    capture_output=True,
+                    text=True
+                )
 
-        return JsonResponse({"status": "success", "output": terminal_output})
+                # Check if the command was successful
+                if result.returncode == 0:
+                  
+                    return JsonResponse({"status": "success", "output": result.stdout})
+                else:
+                    print(f"Error executing script in container for {container_name}:")
+                    print(result.stderr)  # This contains any error messages
+                    return JsonResponse({"status": "error", "output": result.stderr})
 
+
+        
+
+        except Exception as e:
+            print(f"An error occurred while executing the script for {container_name}: {str(e)}")
+            return JsonResponse({"status": "error", "output": str(e)})
+
+        #terminal_output = os.popen(run_command).read().strip()
+        
+       # if "Traceback" in terminal_output or "Error" in terminal_output or "Exception" in terminal_output:
+        
     except json.JSONDecodeError:
         return JsonResponse({"status": "error", "message": "Geçersiz JSON formatı."})
 

@@ -1,3 +1,4 @@
+import subprocess
 from django.shortcuts import render
 from django.http import JsonResponse
 import json
@@ -242,10 +243,34 @@ def handle_docker_operations(config_path, request):
             safe_student_name = student.replace("_", "-")
             os.system(f"docker build -t {safe_student_name} {os.path.join(uploads_dir, student)}")
 
+
+     
         # Docker container'ları çalıştır
         for student in students:
             safe_student_name = student.replace("_", "-")
-            os.system(f"docker run --name {safe_student_name}-container {safe_student_name}")
+            os.system(f"docker run -d  --name {safe_student_name}-container {safe_student_name} tail -f /dev/null")
+            
+        for student in students:
+            safe_student_name = student.replace("_", "-")
+            try:
+                result = subprocess.run(
+                    f"docker exec {safe_student_name}-container python /app/{file_name}.py",
+                    shell=True,
+                    capture_output=True,
+                    text=True
+                )
+
+                # Check if the command was successful
+                if result.returncode == 0:
+                    print(result.stdout)  # This contains the output of the Python script
+                else:
+                    print(f"Error executing script in container for {safe_student_name}:")
+                    print(result.stderr)  # This contains any error messages
+
+            except Exception as e:
+                print(f"An error occurred while executing the script for {safe_student_name}: {str(e)}")
+
+            
 
 
         return JsonResponse({"message": "Docker işlemleri başarıyla tamamlandı!"})
