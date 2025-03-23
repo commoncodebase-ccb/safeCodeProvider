@@ -4,7 +4,7 @@
 
 
 ## Table of Contents
-- [Başlık 1](#**Coding Exam Platform**)
+- [**Coding Exam Platform**](#**Coding Exam Platform**)
 - [Başlık 2](#başlık-2)
 - [Başlık 3](#başlık-3)
 - [Başlık 1](#başlık-1)
