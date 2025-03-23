@@ -4,15 +4,17 @@
 
 
 ## Table of Contents
-- [**Overview**](#**Overview**)
-- [Başlık 2](#başlık-2)
-- [Başlık 3](#başlık-3)
-- [Başlık 1](#başlık-1)
-- [Başlık 2](#başlık-2)
-- [Başlık 3](#başlık-3)
-- [Başlık 1](#başlık-1)
-- [Başlık 2](#başlık-2)
-- [Başlık 3](#başlık-3)
+- [**Overview**](#overview)
+- [**Key Features**](#key-features)
+- [**Instructor Capabilities**](#instructor-capabilities)
+- [**Student Capabilities**](#student-capabilities)
+- [**Technical Architecture**](#technical-architecture)
+- [**Workflow**](#workflow)
+- [**Prerequisites**](#prerequisites)
+- [**Installation**](#installation)
+- [**Potential Enhancements**](#potential-enhancements)
+- [**Main Contributers**](#main-contributers)
+- [**License**](#license)
 
 
 
