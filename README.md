@@ -1,9 +1,4 @@
 
-
-
-
-
-
 [<img align="right" src="https://visitor-badge.laobi.icu/badge?page_id=commoncodebase-ccb/safeCodeProvider">
 ](https://visitor-badge.laobi.icu/badge?page_id=commoncodebase-ccb/safeCodeProvider)
 
@@ -12,7 +7,7 @@
 # **Coding Exam Platform**
 
 <p align="center">
-  <img src="ccbLogo.png" alt="Project Logo" width="300" align="left">
+  <img src="ccbLOGO.png" alt="Project Logo" width="300" align="left">
 </p>
 <br><br><br><br><br><br><br><br><br>
 
