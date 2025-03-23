@@ -3,6 +3,17 @@
 ](https://visitor-badge.laobi.icu/badge?page_id=commoncodebase-ccb/safeCodeProvider)
 
 
+
+
+
+# **Coding Exam Platform**
+
+<p align="center">
+  <img src="ccbLOGO.jpg" alt="Project Logo" width="900" height="200" style="display:block; margin-left:auto; margin-right:auto;">
+<br>
+</p>
+<br>
+
 ## Table of Contents
 - [**Overview**](#overview)
 - [**Key Features**](#key-features)
@@ -16,14 +27,6 @@
 - [**Main Contributers**](#main-contributers)
 - [**License**](#license)
 
-
-
-# **Coding Exam Platform**
-
-<p align="center">
-  <img src="ccbLOGO.jpg" alt="Project Logo" width="900" height="200" style="display:block; margin-left:auto; margin-right:auto;">
-<br>
-</p>
 <br>
 
 ## **Overview**
