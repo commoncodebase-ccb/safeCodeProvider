@@ -171,12 +171,9 @@ The Coding Exam Platform is a specialized local network-based system designed fo
 
 
 ## **License**
-This project is licensed under MIT License and **Anti-Capitalist Software License (ACSL)**.  
-It is **strictly prohibited** to use this software for commercial purposes, profit-making ventures, or in support of capitalist organizations.  
-
-However, contributions and modifications are **welcome** under the terms of this license.  
+GNU General Public License v3.0
 
 For full terms and conditions, see the [LICENSE](LICENSE) file or visit the official license page:  
-🔗 [Anti-Capitalist Software License](https://anticapitalist.software)
+🔗 [[GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.html)
 
 For further inquiries or contributions, please submit a pull request or reach out via the project's repository.
