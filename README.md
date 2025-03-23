@@ -1,5 +1,5 @@
 
-[![License - MIT 3-Clause](https://img.shields.io/pypi/l/sfsgl.svg)](https://github.com/commoncodebase-ccb/sfsgl/blob/main/LICENSE):
+[![License - MIT 3-Clause](https://img.shields.io/pypi/l/sfsgl.svg)](https://github.com/hasanaliozkan-dev/sfsgl/blob/main/LICENSE):
 
 
 
