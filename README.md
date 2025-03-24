@@ -26,6 +26,7 @@
 - [**Potential Enhancements**](#potential-enhancements)
 - [**Main Contributers**](#main-contributers)
 - [**License**](#license)
+- [**User Interface (UI) Screenshots**](#User_Interface_(UI)_Screenshots)
 
 <br>
 
@@ -76,6 +77,22 @@ The Coding Exam Platform is a specialized local network-based system designed fo
 4. The instructor monitors students' progress and reviews real-time code execution results.
 5. Students submit their final solutions, which are automatically stored in the designated output directory.
 6. The exam concludes either upon time expiration or manual termination by the instructor.
+
+## User Interface (UI) Screenshots
+
+Below are the main interface screens of the project:
+
+### 1. Login Page  
+![Login Page](images/login.png)
+
+### 2. Dashboard  
+![Dashboard](images/dashboard.png)
+
+### 3. Settings Page  
+![Settings Page](images/settings.png)
+
+### 4. Profile Page  
+![Profile Page](images/profile.png)
 
 
 ### Prerequisites
