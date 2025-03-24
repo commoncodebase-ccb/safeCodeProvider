@@ -44,16 +44,16 @@ def upload_files(request):
         for file_type in required_files:
             uploaded_file = request.FILES.get(file_type)
             if not uploaded_file:
-                return JsonResponse({'error': f'{file_type} dosyası eksik!'}, status=400)
+                return JsonResponse({'error': f'{file_type} Missing file!'}, status=400)
 
-            # **Dosya uzantısını kontrol et**
+            # check file extension
             allowed_extensions = ALLOWED_EXTENSIONS.get(file_type)
             if allowed_extensions:
                 file_extension = uploaded_file.name.split('.')[-1].lower()
                 if file_extension not in allowed_extensions:
                     return JsonResponse({'error': f'{file_type} sadece {", ".join(allowed_extensions)} formatında olmalıdır!'}, status=400)
 
-            # **Dosyayı kaydet**
+            # save file
             save_path = os.path.join(settings.MEDIA_ROOT, file_type)
             os.makedirs(save_path, exist_ok=True)
 
@@ -64,28 +64,28 @@ def upload_files(request):
 
             uploaded_files[file_type] = uploaded_file.name
 
-        return JsonResponse({'message': f"Tüm dosyalar başarıyla yüklendi: {', '.join(uploaded_files.values())}"})
+        return JsonResponse({'message': f"All files uploaded successfully: {', '.join(uploaded_files.values())}"})
 
-    return JsonResponse({'error': 'Geçersiz istek'}, status=400)
+    return JsonResponse({'error': 'invalid request'}, status=400)
 
 def convert_csv_to_json(csv_filename):
-    # CSV dosyasının tam yolunu oluştur
+    # Generate full path to CSV file
     csv_path = os.path.join(settings.MEDIA_ROOT, "student_list", csv_filename)
 
-    # JSON dosyasının tam yolunu oluştur (Projenin kök dizini)
+    # Create full path of JSON file (Project root directory)
     json_path = os.path.join(settings.BASE_DIR, "students.json")
 
     students_data = []
 
-    # CSV dosyasını oku
+    # read CSV file
     with open(csv_path, mode="r", encoding="utf-8") as csv_file:
-        csv_reader = csv.reader(csv_file)  # Sadece virgülle ayrılmış verileri okuyoruz
+        csv_reader = csv.reader(csv_file)  
         for row in csv_reader:
-            if len(row) == 2:  # Her satırda iki veri olduğundan emin ol
-                student_id, _ = row  # Sadece id'yi al, ismi kullanmıyoruz
+            if len(row) == 2: 
+                student_id, _ = row 
                 students_data.append({"id": student_id, "isLogged": "false"})
 
-    # JSON dosyasına yaz
+    # write JSON file
     with open(json_path, mode="w", encoding="utf-8") as json_file:
         json.dump(students_data, json_file, indent=4, ensure_ascii=False)
 
@@ -104,10 +104,10 @@ def start_exam(request):
             assignment_file = request.FILES.get("assignment_file")
 
             if not exam_name or not exam_time or not exam_password:
-                return JsonResponse({"error": "Eksik sınav bilgisi gönderildi."}, status=400)
+                return JsonResponse({"error": "Incomplete exam information was sent."}, status=400)
             
             if not student_list or not exam_instruction or not assignment_file:
-                return JsonResponse({"error": "Tüm dosyalar yüklenmelidir!"}, status=400)
+                return JsonResponse({"error": "All files must be uploaded!"}, status=400)
 
             student_list_name = save_uploaded_file(student_list, "student_list")
             exam_instruction_name = save_uploaded_file(exam_instruction, "exam_instruction")
@@ -126,6 +126,7 @@ def start_exam(request):
 
             assignment_folder = "media/assignment_file"
             file_type = "unknown"
+
             if os.path.exists(assignment_folder):
                 files = os.listdir(assignment_folder)
                 if files:
@@ -140,8 +141,8 @@ def start_exam(request):
                 "exam_name": exam_name,
                 "exam_time": exam_time,
                 "exam_password": exam_password,
-                "file_name": file_name,  # Dosya adı
-                "type": file_type,  # Dosya uzantısı
+                "file_name": file_name,  
+                "type": file_type,  
                 "student_list": student_list_name,
                 "exam_instruction": exam_instruction_name,
                 "assignment_file": assignment_file_name
@@ -159,26 +160,26 @@ def start_exam(request):
 
 def handle_docker_operations(config_path, request):
     try:
-        # 📌 1. config.json dosyasını oku
+        # read config.json folder
         with open(config_path, "r", encoding="utf-8") as file:
             config = json.load(file)
 
         exam_type = config.get("type", "py").lower()
         file_name = config.get("file_name", "script").lower()
 
-        # 📌 2. Dockerfile seçimi
+        # choosing Dockerfile 
         dockerfile_map = {
             "py": "docker/python.Dockerfile",
             "java": "docker/java.Dockerfile",
             "c": "docker/c.Dockerfile"
         }
+
         dockerfile_path = os.path.join(os.getcwd(),dockerfile_map.get(exam_type))
 
         if not dockerfile_path or not os.path.exists(dockerfile_path):
             return JsonResponse({"error": f"Unsupported or missing Dockerfile for exam type: {exam_type}"}, status=400)
 
-        # CSV dosyasının olduğu klasör
-        csv_dir = "media/student_list"
+        csv_dir = "media/student_list" #csv file path
         csv_files = os.listdir(csv_dir)
 
         if not csv_files:
@@ -186,19 +187,19 @@ def handle_docker_operations(config_path, request):
         
         csv_file_path = os.path.join(csv_dir, csv_files[0])
 
-        # script dosyasının olduğu klasör
-        script_dir = "media/assignment_file"
+        script_dir = "media/assignment_file"# starter code file path
         script_files = os.listdir(script_dir)
+
         if not script_files:
             return JsonResponse({"error": "No assignment file found in assignment_file folder"}, status=400)
         
         script_file_path = os.path.join(script_dir, script_files[0])
 
-        # "uploads" klasörü yoksa oluştur
+        # creating "uploads" 
         uploads_dir = "uploads"
         os.makedirs(uploads_dir, exist_ok=True)
 
-        # CSV dosyasını oku ve öğrenci ID_İsim formatında listeye al
+        # Read the CSV file and add it to "uploads" as studentID_studentName  
         students = []
         with open(csv_file_path, "r", encoding="utf-8") as file:
             reader = csv.reader(file)
@@ -210,15 +211,15 @@ def handle_docker_operations(config_path, request):
                     folder_name = f"{student_id}_{student_name}"
                     students.append(folder_name)
 
-        # Öğrenci klasörlerini oluştur ve dosyaları kopyala
+        # Create student folders and copy files
         for student in students:
-            folder_path = os.path.join(uploads_dir, student)#uploads/ID_name
+            folder_path = os.path.join(uploads_dir, student) #uploads/studentID_studentName
             os.makedirs(folder_path, exist_ok=True)
             
             with open(dockerfile_path, "r") as file:
                 dockerfile_lines = file.readlines()
 
-             # CMD komutunu öğrenciye özel hale getir
+             # Make CMD command student specific
             if exam_type == "py":
                 cmd_line = f'CMD ["/bin/sh", "-c", "python {file_name}.py"]\n'
             elif exam_type == "java":
@@ -228,33 +229,41 @@ def handle_docker_operations(config_path, request):
             else:
                 return JsonResponse({"error": f"Unsupported file type: {exam_type}"}, status=400)
 
-
-            # Son satırı özel CMD ile değiştir
+            # Replace last line with custom CMD
             dockerfile_lines[-1] = cmd_line
             
-            student_dockerfile_path = os.path.join(folder_path, "Dockerfile")
+            student_dockerfile_path = os.path.join(folder_path, "Dockerfile") #uploads/studentID_studentName/Dockerfile
+            
             with open(student_dockerfile_path, "w") as file:
                 file.writelines(dockerfile_lines)
 
             shutil.copy(script_file_path, os.path.join(folder_path, os.path.basename(script_file_path)))
 
-        # Docker image'leri oluştur
+        # Create Docker image
         for student in students:
             safe_student_name = student.replace("_", "-")
             os.system(f"docker build -t {safe_student_name} {os.path.join(uploads_dir, student)}")
-
-
      
-        # Docker container'ları çalıştır
+        # Run Docker container
         for student in students:
             safe_student_name = student.replace("_", "-")
             os.system(f"docker run -d  --name {safe_student_name}-container {safe_student_name} tail -f /dev/null")
             
         for student in students:
             safe_student_name = student.replace("_", "-")
+
+            if exam_type == "py":
+                docker_exec_cmd = f"docker exec {safe_student_name}-container python /app/{file_name}.py",
+            elif exam_type == "java":
+                docker_exec_cmd = f"docker exec {safe_student_name}-container javac /app/{file_name}.java && docker exec {safe_student_name}-container java -cp /app {file_name}"
+            elif exam_type == "c":
+                docker_exec_cmd = f"docker exec {safe_student_name}-container gcc /app/{file_name}.c -o /app/{file_name} && docker exec {safe_student_name}-container /app/{file_name}"
+            else:
+                return JsonResponse({"error": f"Unsupported file type: {exam_type}"}, status=400)
+            
             try:
                 result = subprocess.run(
-                    f"docker exec {safe_student_name}-container python /app/{file_name}.py",
+                    docker_exec_cmd,
                     shell=True,
                     capture_output=True,
                     text=True
@@ -271,8 +280,6 @@ def handle_docker_operations(config_path, request):
                 print(f"An error occurred while executing the script for {safe_student_name}: {str(e)}")
 
             
-
-
         return JsonResponse({"message": "Docker işlemleri başarıyla tamamlandı!"})
     
     except Exception as e:
@@ -280,13 +287,13 @@ def handle_docker_operations(config_path, request):
 
 
 def submits_page(request):
-    # config.json dosyasını oku
+    # read config.json file
     config_path = os.path.join(settings.BASE_DIR, "config.json")
     with open(config_path, "r", encoding="utf-8") as config_file:
         config_data = json.load(config_file)
     exam_password = config_data.get("exam_password", "Not Found")
 
-    # student_list klasöründeki ilk .csv dosyasını bul
+    # Find the first .csv file in the student_list folder
     student_list_path = os.path.join(settings.MEDIA_ROOT, "student_list")
     student_file = next((f for f in os.listdir(student_list_path) if f.endswith(".csv")), None)
 
@@ -296,7 +303,7 @@ def submits_page(request):
         with open(csv_path, "r", encoding="utf-8") as file:
             reader = csv.reader(file)
             for row in reader:
-                if len(row) == 2:  # Beklenen format: "id, name"
+                if len(row) == 2: # Expected format: "id, name"
                     students.append({"id": row[0], "name": row[1]})
 
     return render(request, "submits_page.html", {"exam_password": exam_password, "students": students})
@@ -316,12 +323,12 @@ def bring_code(request):
         file_name += f".{exam_type}"
 
         folder_name = f"{student_id}_{student_name}"
-        student_folder = os.path.join(UPLOADS_DIR, folder_name)#uploads/220717005_emre
+        student_folder = os.path.join(UPLOADS_DIR, folder_name) #uploads/studentID_studentName
 
         if not os.path.exists(student_folder):
             return JsonResponse({'status': 'error', 'message': 'Student folder not found'})
         
-        # Öğrencinin kod dosyası yolunu oluştur
+        # Create student's code file path
         code_file_path = os.path.join(student_folder, file_name)
 
         if not os.path.exists(code_file_path):
@@ -336,7 +343,7 @@ def bring_code(request):
             "exam_type": exam_type
         })
     except Exception as e:
-        return JsonResponse({"error": f"kod dondurulurken bir hata olustu: {str(e)}"})
+        return JsonResponse({"error": f" An error occurred while returning the code: {str(e)}"})
     
 
 @csrf_exempt
@@ -344,19 +351,17 @@ def open_student_port(request):
     print("Pathhhhh   " + os.getcwd())
     if request.method == "POST":
         try:
-            # Kullanıcının ana dizinini al (Örneğin: /home/kullanici veya C:\Users\mazlu)
+            # Get the user's home directory (For example: /home/user)
             home_dir = os.path.expanduser("~")
 
-            # SafeCodeProvider'ın tam yolu
+            # Full path to SafeCodeProvider
             project_path = os.getcwd()
 
-            print("Pathhhhh   " + project_path)
-
-            # İşletim sistemini tespit et
+            # Detect operating system
             system_type = platform.system()
 
             if system_type == "Windows":
-                # Windows için yeni terminal açıp Django sunucusunu başlat
+                # Open a new terminal for Windows and start the Django server
                 os.system(f'start cmd /k "cd /d {project_path} && py manage.py runserver 8001 --settings=safeCodeProvider.settings.student_settings"')
 
             
@@ -371,14 +376,14 @@ def open_student_port(request):
             else:
                 return JsonResponse({"error": "Bilinmeyen işletim sistemi"}, status=500)
 
-            # Config.json dosyasından "exam_time" değerini oku
-            exam_time = 0  # Varsayılan değer
+            
+            exam_time = 0 
             if os.path.exists(CONFIG_FILE):
                 with open(CONFIG_FILE, "r") as f:
                     config = json.load(f)
                     exam_time = config.get("exam_time", 0)
 
-            return JsonResponse({"message": "✅ 8001 portu açıldı!", "exam_time": exam_time}, status=200)
+            return JsonResponse({"message": "8001 port is opened!", "exam_time": exam_time}, status=200)
 
         except Exception as e:
             return JsonResponse({"error": str(e) , "path": os.getcwd()}, status=500)
@@ -386,7 +391,7 @@ def open_student_port(request):
     return JsonResponse({"error": "Invalid request", "path": os.getcwd()}, status=400)
 
 
-# Yönetici yetkisi olup olmadığını kontrol et
+# Check if you have administrator rights
 def is_admin():
     try:
         return ctypes.windll.shell32.IsUserAnAdmin()
@@ -398,13 +403,8 @@ def is_admin():
 def close_student_port(request):
     if request.method == "POST":
         try:
-            # Linux/macOS için iptables komutu
-            #os.system("sudo iptables -A INPUT -p tcp --dport 8001 -j DROP")
-            
-            # `close_port.py` dosyasını çalıştır
-            
             os.system("start cmd /k py close_port.py")
-            return JsonResponse({"message": "8001 portu kapatıldı!"}, status=200)
+            return JsonResponse({"message": "8001 port is closed!"}, status=200)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
 
