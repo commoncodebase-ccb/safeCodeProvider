@@ -9,7 +9,7 @@
 # **Coding Exam Platform**
 
 <p align="center">
-  <img src="photosAndSS/ccbLOGO.jpg" alt="Project Logo" width="900" height="200" style="display:block; margin-left:auto; margin-right:auto;">
+  <img src="images/ccbLOGO.jpg" alt="Project Logo" width="900" height="200" style="display:block; margin-left:auto; margin-right:auto;">
 <br>
 </p>
 <br>
@@ -81,16 +81,16 @@ The Coding Exam Platform is a specialized local network-based system designed fo
 Below are the main interface screens of the project:
 
 ### 1. Instructor Start Page  
-![Instructor Start Page](photosAndSS/instructorLogin.jpeg)
+![Instructor Start Page](images/instructorLogin.jpeg)
 
 ### 2. Instructor Exam Interface
-![Instructor Exam Page](photosAndSS/instructorExamPage.jpeg)
+![Instructor Exam Page](images/instructorExamPage.jpeg)
 
 ### 3. Student Login Page
-![Student Login Page](photosAndSS/studentLogin.jpeg)
+![Student Login Page](images/studentLogin.jpeg)
 
 ### 4. Student Exam page 
-![Student Exam page](photosAndSS/studentExamPage.jpeg)
+![Student Exam page](images/studentExamPage.jpeg)
 
 
 ### Prerequisites
