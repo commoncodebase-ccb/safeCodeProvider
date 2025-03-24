@@ -48,15 +48,15 @@ def student_control(request):
         if not student_exists:  
             return JsonResponse({'status': 'error', 'message': 'Student not found in the list'})  
 
-# JSON dosyasının tam yolunu belirle
+# Determine the full path of the JSON file
         json_path = os.path.join(settings.BASE_DIR, "students.json")
 
-        # JSON dosyasını oku
+        # Read the JSON file
         if os.path.exists(json_path):
             with open(json_path, "r", encoding="utf-8") as json_file:
-                students_data = json.load(json_file)  # JSON verisini liste olarak al
+                students_data = json.load(json_file)  # Get JSON data as a list
         
-           # Kullanıcının ID'sini kontrol et ve isLogged değerini güncelle
+        # Check the user's ID and update the isLogged value
             user_found = False
             for student in students_data:
                 if student["id"] == student_id:
@@ -70,7 +70,7 @@ def student_control(request):
                     break
 
             if user_found:
-                # Güncellenmiş veriyi tekrar JSON dosyasına yaz
+                # Write the updated data back to the JSON file
                 with open(json_path, "w", encoding="utf-8") as json_file:
                     json.dump(students_data, json_file, indent=4, ensure_ascii=False)
 
@@ -95,13 +95,13 @@ def exam_page(request):
     try:
         with open(config_path, 'r') as config_file:
             config_data = json.load(config_file)
-            exam_time = int(config_data.get('exam_time', 10))  # Dakika cinsinden
-            exam_type = config_data.get('exam_type', 'py')  # Örneğin "py", "java", "c"
+            exam_time = int(config_data.get('exam_time', 10))  # In minutes
+            exam_type = config_data.get('exam_type', 'py')  # For example "py", "java", "c"
     except FileNotFoundError:
         exam_time = 10
         exam_type = 'py'
     
-    # exam_instruction klasöründen PDF dosyasını dinamik olarak bulalım (dosya adını sabit kodlamıyoruz)
+    # Dynamically find the PDF file from the exam_instruction folder (we do not hardcode the file name)
     pdf_url = ''
     exam_instruction_folder = os.path.join(settings.MEDIA_ROOT, 'exam_instruction')
     if os.path.exists(exam_instruction_folder):
@@ -109,7 +109,7 @@ def exam_page(request):
         if pdf_files:
             pdf_url = settings.MEDIA_URL + 'exam_instruction/' + pdf_files[0]
     
-    # assignment_file klasöründen dosya içeriğini dinamik olarak oku
+    # Dynamically read the file content from the assignment_file folder
     assignment_content = ''
     assignment_folder = os.path.join(settings.MEDIA_ROOT, 'assignment_file') 
     if os.path.exists(assignment_folder):
@@ -120,7 +120,7 @@ def exam_page(request):
                 with open(file_path, 'r', encoding='utf-8') as f:
                     assignment_content = f.read()
             except Exception as e:
-                assignment_content = f"Dosya okunurken hata oluştu: {e}"
+                assignment_content = f"An error occurred while reading the file: {e}"
     
     return render(request, 'exam_page.html', {
         'exam_time': exam_time,
@@ -131,15 +131,15 @@ def exam_page(request):
 
 def save_code(request):
     try:
-        # JSON verisini al
+        # Get the JSON data
         body = json.loads(request.body)
 
-        # JSON verisini kullanarak bilgileri al
+        # Get the information using the JSON data
         student_id = body.get('student_id')
         student_name = body.get('student_name').lower()
         code = body.get('code')
 
-        # Konfigürasyon dosyasını aç
+        # Open the configuration file
         config_path = "config.json"
         with open(config_path, "r", encoding="utf-8") as file:
             config = json.load(file)
@@ -148,7 +148,7 @@ def save_code(request):
         exam_type = config.get("type", "py").lower()
         file_name += f".{exam_type}"
 
-        # Öğrencinin dosya yolu
+        # Path to the student's file
         folder_name = f"{student_id}_{student_name}"
         print("folder_name:", folder_name)
         student_folder = os.path.join(UPLOADS_DIR, folder_name)#uploads/220717005_emre
@@ -195,24 +195,27 @@ def run_code(request):
         student_folder = os.path.abspath(os.path.join(UPLOADS_DIR, folder_name))
 
 
-        # Mevcut container'ı kontrol et
+        # Check the existing container
         check_status_command = f"docker ps -a -f name={container_name} --format '{{{{.State}}}}'"
         container_status = os.popen(check_status_command).read().strip()
 
-        # Eski container varsa kaldır
-        #if container_status:
-        #    os.system(f"docker rm -f {container_name}")
-
-        #os.system(f"docker build -t {image_name} {student_folder}")
-
-        # Yeni container oluştur ve kodu çalıştıru
-        #run_command = f"docker run --rm --name {container_name} -v {student_folder}:/app/uploads {image_name} python3 /app/uploads/{file_name} 2>&1"
+       
         code_file_path = os.path.join(student_folder, file_name)
+
+        # if you want to add more languages, you can add them here with elif statements like below. 
+        docker_exec_command=""
+        if exam_type=="py":
+            docker_exec_command = f"docker exec {container_name} python /app/{file_name}"
+        elif exam_type=="java":
+            docker_exec_command = f"docker exec {container_name} javac /app/{file_name}.java && docker exec {container_name} java -cp /app {file_name}"
+        elif exam_type=="c":
+            docker_exec_command = f"docker exec {container_name} gcc /app/{file_name}.c -o /app/{file_name} && docker exec {container_name}- /app/{file_name}"
+
         copy_command = f"docker cp {code_file_path} {container_name}:/app/{file_name}"
         os.system(copy_command)
         try:
                 result = subprocess.run(
-                    f"docker exec {container_name} python /app/{file_name}",
+                    docker_exec_command,
                     shell=True,
                     capture_output=True,
                     text=True
@@ -244,38 +247,28 @@ def run_code(request):
 
 def delete_docker(request):
     try:
-        # JSON verisini al
+        # Get the JSON data
         body = json.loads(request.body)
 
-        # JSON verisini kullanarak bilgileri al
+        # Get the JSON data
         student_id = body.get('student_id')
         student_name = body.get('student_name').lower()
 
-        # Docker container ve image isimlerini oluştur
+        # Create Docker container and image names
         container_name = f"{student_id}-{student_name}-container"
         image_name = f"{student_id}-{student_name}"
 
-        # Önce container'ı durdur ve sil
+        # First, stop and remove the container
         stop_container_command = f"docker stop {container_name} && docker rm {container_name}"
         delete_image_command = f"docker rmi -f {image_name}"
 
         print(f"Stopping and removing container: {container_name}")
-        os.system(stop_container_command)  # Container'ı durdur ve sil
+        os.system(stop_container_command)  # Stop and remove the container
         print(f"Removing image: {image_name}")
-        os.system(delete_image_command)  # Image'ı sil
+        os.system(delete_image_command)  # Delete the image
 
         return JsonResponse({'status': 'success', 'message': 'Docker container and image deleted successfully!'})
 
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
     
-
-''''def get_exam_time(request):
-    try:
-        with open("config.json", "r", encoding="utf-8") as file:
-            data = json.load(file)
-            exam_time = int(data.get("exam_time", 30))  # Default 30 dakika
-            return JsonResponse({"exam_time": exam_time})
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)'
-'''
