@@ -156,7 +156,9 @@ def start_exam(request):
         except Exception as e:
             return JsonResponse({"error": f"Sunucu hatası: {str(e)}"}, status=500)
 
-
+def convert_to_ascii(text):
+    turkish_map = str.maketrans("çğıöşüÇĞİÖŞÜ", "cgiosuCGIOSU")
+    return text.translate(turkish_map)
 
 def handle_docker_operations(config_path, request):
     try:
@@ -207,6 +209,7 @@ def handle_docker_operations(config_path, request):
                 if len(row) >= 2:
                     student_id = row[0]
                     student_name = row[1].strip().lower().replace(" ", "-")
+                    student_name = convert_to_ascii(student_name) 
                     container_name = f"{student_id}-{student_name}-container"
                     folder_name = f"{student_id}_{student_name}"
                     students.append(folder_name)
@@ -244,11 +247,25 @@ def handle_docker_operations(config_path, request):
             safe_student_name = student.replace("_", "-")
             os.system(f"docker build -t {safe_student_name} {os.path.join(uploads_dir, student)}")
      
-        # Run Docker container
         for student in students:
             safe_student_name = student.replace("_", "-")
-            os.system(f"docker run -d  --name {safe_student_name}-container {safe_student_name} tail -f /dev/null")
-            
+            container_name = f"{safe_student_name}-container"
+
+            # Find the existing container
+            result = subprocess.run(
+                ["docker", "ps", "-a", "-q", "--filter", f"name={container_name}"],
+                capture_output=True,encoding="utf-8", text=True
+            )
+
+            container_id = result.stdout.strip()  # If there is an ID, get it, otherwise it will be an empty string
+
+            # If there is a container, remove it
+            if container_id:
+                subprocess.run(["docker", "rm", "-f", container_id])
+
+            # Start a new container
+            subprocess.run(["docker", "run", "-d", "--name", container_name, safe_student_name, "tail", "-f", "/dev/null"])
+
         for student in students:
             safe_student_name = student.replace("_", "-")
 
@@ -398,11 +415,31 @@ def is_admin():
     except:
         return False
 
+def remove_all_containers():
+    try:
+        # Get all container IDs
+        result = subprocess.run(["docker", "ps", "-aq"], capture_output=True, text=True, check=True)
+        container_ids = result.stdout.strip().split("\n")
+
+        if container_ids and container_ids[0]:  # if the list is not empty
+            print(f"Containers to be removed: {container_ids}")
+
+            # Same Docker command for Windows and Linux/macOS
+            subprocess.run(["docker", "rm", "-f"] + container_ids,encoding="utf-8", check=True)
+            print("All containers removed successfully.")
+        else:
+            print("No containers found to remove.")
+
+    except subprocess.CalledProcessError as e:
+        print(f"An error occurred: {e}")
 
 @csrf_exempt
 def close_student_port(request):
     if request.method == "POST":
         try:
+            # First, stop and remove all Docker containers
+            remove_all_containers()
+
             os.system("start cmd /k py close_port.py")
             return JsonResponse({"message": "8001 port is closed!"}, status=200)
         except Exception as e:
