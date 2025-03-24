@@ -17,11 +17,9 @@
 ## Table of Contents
 - [**Overview**](#overview)
 - [**Key Features**](#key-features)
-- [**Instructor Capabilities**](#instructor-capabilities)
-- [**Student Capabilities**](#student-capabilities)
 - [**Technical Architecture**](#technical-architecture)
 - [**Workflow**](#workflow)
-- [**User Interface (UI) Screenshots**](#User_Interface_(UI)_Screenshots)
+- [**User Interface Screenshots**](#user-interface-screenshots)
 - [**Prerequisites**](#prerequisites)
 - [**Installation**](#installation)
 - [**Potential Enhancements**](#potential-enhancements)
@@ -78,7 +76,7 @@ The Coding Exam Platform is a specialized local network-based system designed fo
 5. Students submit their final solutions, which are automatically stored in the designated output directory.
 6. The exam concludes either upon time expiration or manual termination by the instructor.
 
-## User Interface (UI) Screenshots
+## User Interface Screenshots
 
 Below are the main interface screens of the project:
 
