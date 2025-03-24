@@ -21,12 +21,12 @@
 - [**Student Capabilities**](#student-capabilities)
 - [**Technical Architecture**](#technical-architecture)
 - [**Workflow**](#workflow)
+- [**User Interface (UI) Screenshots**](#User_Interface_(UI)_Screenshots)
 - [**Prerequisites**](#prerequisites)
 - [**Installation**](#installation)
 - [**Potential Enhancements**](#potential-enhancements)
 - [**Main Contributers**](#main-contributers)
 - [**License**](#license)
-- [**User Interface (UI) Screenshots**](#User_Interface_(UI)_Screenshots)
 
 <br>
 
