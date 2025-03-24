@@ -81,32 +81,6 @@
     </footer>
 
     <script>
-        /*function uploadFile(inputId, fileType) {
-            let input = document.getElementById(inputId);
-            let file = input.files[0];
-            if (!file) {
-                alert("Lütfen bir dosya seçin!");
-                return;
-            }
-
-            let formData = new FormData();
-            formData.append("file", file);
-            formData.append("file_type", fileType);
-
-            let csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-
-            fetch('/teacher/upload/', {
-                method: 'POST',
-                body: formData,
-                headers: {
-            "X-CSRFToken": csrfToken  // CSRF token'ı header'a ekliyoruz
-        }
-            })
-            .then(response => response.json())
-            .then(data => alert(data.message))
-            .catch(error => console.error(error));
-        }*/
         function updateFileName(input) {
             const fileNameDiv = document.getElementById(input.id + "_name");
             fileNameDiv.textContent = input.files.length > 0 ? input.files[0].name : "No file chosen";
@@ -129,59 +103,6 @@
             window.location.href = "/submits/";
         }
 
-/**
-        function uploadAllFiles() {
-        let studentList = document.getElementById("student_list").files[0];
-        let examInstruction = document.getElementById("exam_instruction").files[0];
-        let assignmentFile = document.getElementById("assignment_file").files[0];
-
-        if (!studentList || !examInstruction || !assignmentFile) {
-            alert("Lütfen tüm dosyaları seçin!");
-            return;
-        }
-
-
-        // **Dosya uzantılarını kontrol et**
-        if (!studentList.name.endsWith('.csv')) {
-            alert("Öğrenci listesi sadece .csv formatında olmalıdır!");
-            return;
-        }
-
-        if (!examInstruction.name.endsWith('.pdf')) {
-            alert("Sınav talimatı sadece .pdf formatında olmalıdır!");
-            return;
-        }
-
-        let allowedAssignmentExtensions = ['.py', '.java', '.c'];
-        let assignmentExt = assignmentFile.name.split('.').pop().toLowerCase();
-        if (!allowedAssignmentExtensions.includes(`.${assignmentExt}`)) {
-            alert("Ödev dosyası sadece .py, .java veya .c formatında olmalıdır!");
-            return;
-        }
-
-
-
-
-        let formData = new FormData();
-        formData.append("student_list", studentList);
-        formData.append("exam_instruction", examInstruction);
-        formData.append("assignment_file", assignmentFile);
-
-        let csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-        fetch('/teacher/upload/', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                "X-CSRFToken": csrfToken
-            }
-        })
-        .then(response => response.json())
-        .then(data => alert(data.message))
-        .catch(error => console.error(error));
-    }
-**/
-
         function startExam() {
                 // Show loading popup
             document.getElementById("loading_popup").style.display = "flex";
@@ -199,7 +120,6 @@
 
             let time = document.getElementById("exam_time").value;
             let exam_name = document.getElementById("exam_name").value;
-            //let outputDirectory = document.getElementById("output_directory").value;
             let studentList = document.getElementById("student_list").files[0];
             let examInstruction = document.getElementById("exam_instruction").files[0];
             let assignmentFile = document.getElementById("assignment_file").files[0];

@@ -100,7 +100,7 @@
 <body>
     <div class="navbar">
         <h2 style="text-align: center; font-family: Unbounded, serif;">Safe Code Provider | Submits Panel</h2>
-        <h2>Sınav Süresi: <span id="timer" style="color: #ff4d00;">--:--</span></h2>
+        <h2>Exam Time: <span id="timer" style="color: #ff4d00;">--:--</span></h2>
 
     </div>
 
@@ -130,7 +130,7 @@
     <div class="right-container" style="margin-right: 60px;">
         <h2 style="margin-top: 20px;">Exam Password: {{ exam_password }}</h1>
             <div class="editor" id="editor-container" style= "height: 700px">
-                <!-- Monaco editörü için konteyner -->
+                <!-- conatiner for Monaco -->
                 <div id="monaco-editor" style="width: 100%; height: 100%;"></div>
             </div>
     </div>
@@ -146,7 +146,7 @@
 
       var editor;
 
-      require(['vs/editor/editor.main'], function() { // exam_type değerini kullanarak dil belirliyoruz.
+      require(['vs/editor/editor.main'], function() { // determine the language using the exam_type value
           var langMap = {
               'py': 'python',
               'java': 'java',
@@ -157,15 +157,13 @@
           editor = monaco.editor.create(document.getElementById('monaco-editor'), {
               value: `{{ assignment_content|escapejs }}`,
               language: editorLanguage,
-              theme: "vs-dark", // Koyu tema eklendi
+              theme: "vs-dark",
               fontSize: 18
 
           });
-  
-          // Toggle butonu için orijinal stil bilgilerini saklayalım
+
           var editorContainer = document.getElementById('editor-container');
           
-  
       });
 
       function bringCode(studentId, studentName) {
@@ -197,7 +195,7 @@
                     monaco.editor.setModelLanguage(editor.getModel(), editorLanguage);
                 }
             } else {
-                alert("Dosya bulunamadı veya okunamadı!");
+                alert("File not found or read!");
             }
         })
         .catch(error => console.error("Error fetching student code:", error));
@@ -206,7 +204,7 @@
     </script>  
 
     <script>
-// CSRF token'ı almak için yardımcı fonksiyon
+    //helper function to get CSRF token
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== "") {
@@ -222,7 +220,6 @@
         return cookieValue;
     }
 
-
         document.getElementById("openPortButton").addEventListener("click", function() {
     fetch("/open_port/", {
         method: "POST",
@@ -234,7 +231,7 @@
     .then(response => response.json())
     .then(data => {
         if (data.exam_time) {
-            startCountdown(data.exam_time); // Geri sayımı başlat
+            startCountdown(data.exam_time); 
         } else {
             alert(data.message || data.error);
         }
@@ -242,9 +239,8 @@
     .catch(error => console.error("Error:", error));
 });
 
-// Geri Sayım Fonksiyonu
 function startCountdown(minutes) {
-    let totalSeconds = minutes * 60; // Dakikayı saniyeye çevir
+    let totalSeconds = minutes * 60; 
 
     function updateTimer() {
         let minutesLeft = Math.floor(totalSeconds / 60);
@@ -253,9 +249,9 @@ function startCountdown(minutes) {
 
         if (totalSeconds > 0) {
             totalSeconds--;
-            setTimeout(updateTimer, 1000); // Her saniye güncelle
+            setTimeout(updateTimer, 1000);
         } else {
-            document.getElementById("timer").textContent = "Süre Bitti!";
+            document.getElementById("timer").textContent = "Time is over!";
         }
     }
 
@@ -280,4 +276,3 @@ function startCountdown(minutes) {
         });
         </script>
 </html>
-
