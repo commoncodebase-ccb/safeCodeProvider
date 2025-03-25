@@ -122,8 +122,13 @@ Below are the main interface screens of the project:
    ```bash
    cd .\safeCodeProvider\
   ```
+### For Windows:
   ```bash
    py manage.py runserver 8000 --settings=safeCodeProvider.settings.teacher_settings
+  ```
+### For macOS:
+  ```bash
+   python3 manage.py runserver 8000 --settings=safeCodeProvider.settings.teacher_settings
   ```
 
 ## **Potential Enhancements**
