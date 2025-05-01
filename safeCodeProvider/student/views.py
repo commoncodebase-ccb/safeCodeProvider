@@ -271,4 +271,20 @@ def delete_docker(request):
 
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
+
+
+def get_config(request):
+    config_path = os.path.join("config.json")
+    if os.path.exists(config_path):
+        with open(config_path, "r", encoding="utf-8") as file:
+            data = json.load(file)
+            return JsonResponse(data)
+    return JsonResponse({"error": "Config file not found"}, status=404)
     
+
+def get_file_content(request):
+    filename = request.GET.get('filename')
+    file_path = os.path.join('media', 'assignment_files', filename)
+    with open(file_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+    return JsonResponse({'content': content})
