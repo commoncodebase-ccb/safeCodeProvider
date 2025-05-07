@@ -197,10 +197,21 @@
                     "X-CSRFToken": csrfToken
                 }
             })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => {
+                            console.error(err);
+                            alert(err.error); // İstersen popup yerine ekrana mesaj gösterebilirsin
+                            throw new Error(err.error); // Akışı durdurmak için
+                        });
+                    }
+                    return response.json();
+                })
                 .then(data => {
                 })
                 .catch(error => console.error(error));
+
+                
         }
 
     </script>
